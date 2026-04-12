@@ -2,1477 +2,759 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>NAVAL STRIKE — Battleships</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
-
-  :root {
-    --ocean-deep: #020c18;
-    --ocean-mid: #041e36;
-    --ocean-surface: #062d52;
-    --radar-green: #00ff88;
-    --radar-dim: #005533;
-    --danger-red: #ff2244;
-    --danger-dim: #550011;
-    --sonar-blue: #00cfff;
-    --sonar-dim: #003344;
-    --miss-grey: #334455;
-    --hull-gold: #c8a84b;
-    --hull-dim: #4a3d1c;
-    --panel-bg: rgba(4, 30, 54, 0.85);
-    --border-glow: rgba(0, 207, 255, 0.3);
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--ocean-deep);
-    color: var(--sonar-blue);
-    font-family: 'Share Tech Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-    position: relative;
-  }
-
-  /* Animated ocean grid background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,207,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,207,255,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    animation: gridDrift 20s linear infinite;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* Scanline overlay */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.15) 2px,
-      rgba(0,0,0,0.15) 4px
-    );
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  @keyframes gridDrift {
-    0% { background-position: 0 0; }
-    100% { background-position: 40px 40px; }
-  }
-
-  #app {
-    position: relative;
-    z-index: 2;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-
-  /* HEADER */
-  header {
-    text-align: center;
-    padding: 24px 0 20px;
-    border-bottom: 1px solid var(--border-glow);
-    margin-bottom: 24px;
-    position: relative;
-  }
-
-  header::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 200px;
-    height: 1px;
-    background: var(--sonar-blue);
-    box-shadow: 0 0 20px var(--sonar-blue);
-  }
-
-  .title {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(1.8rem, 5vw, 3rem);
-    font-weight: 900;
-    letter-spacing: 0.15em;
-    color: var(--sonar-blue);
-    text-shadow: 0 0 30px var(--sonar-blue), 0 0 60px rgba(0,207,255,0.3);
-  }
-
-  .subtitle {
-    font-size: 0.7rem;
-    letter-spacing: 0.4em;
-    color: var(--radar-green);
-    margin-top: 4px;
-    text-shadow: 0 0 10px var(--radar-green);
-  }
-
-  /* PANELS */
-  .panel {
-    background: var(--panel-bg);
-    border: 1px solid var(--border-glow);
-    border-radius: 2px;
-    padding: 20px;
-    position: relative;
-    backdrop-filter: blur(4px);
-  }
-
-  .panel::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--sonar-blue), transparent);
-    opacity: 0.6;
-  }
-
-  .panel-label {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.3em;
-    color: var(--sonar-blue);
-    opacity: 0.7;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-  }
-
-  /* CONNECTION SCREEN */
-  #connection-screen {
-    max-width: 520px;
-    margin: 40px auto;
-  }
-
-  #connection-screen h2 {
-    font-family: 'Orbitron', monospace;
-    font-size: 1rem;
-    color: var(--hull-gold);
-    text-shadow: 0 0 10px var(--hull-gold);
-    margin-bottom: 20px;
-    letter-spacing: 0.1em;
-  }
-
-  .conn-section {
-    margin-bottom: 24px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid rgba(0,207,255,0.1);
-  }
-
-  .conn-section:last-child { border-bottom: none; margin-bottom: 0; }
-
-  .conn-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.25em;
-    color: var(--sonar-blue);
-    opacity: 0.6;
-    margin-bottom: 10px;
-  }
-
-  .your-id-box {
-    background: rgba(0,255,136,0.05);
-    border: 1px solid rgba(0,255,136,0.2);
-    padding: 14px 16px;
-    border-radius: 2px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .your-id-value {
-    font-family: 'Orbitron', monospace;
-    font-size: 1.1rem;
-    color: var(--radar-green);
-    text-shadow: 0 0 10px var(--radar-green);
-    letter-spacing: 0.1em;
-    flex: 1;
-    word-break: break-all;
-  }
-
-  .loading-dots::after {
-    content: '';
-    animation: dots 1.5s infinite;
-  }
-  @keyframes dots {
-    0%   { content: '.'; }
-    33%  { content: '..'; }
-    66%  { content: '...'; }
-    100% { content: ''; }
-  }
-
-  input[type="text"] {
-    width: 100%;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(0,207,255,0.3);
-    color: var(--sonar-blue);
-    font-family: 'Orbitron', monospace;
-    font-size: 0.9rem;
-    padding: 12px 14px;
-    letter-spacing: 0.08em;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    border-radius: 2px;
-  }
-
-  input[type="text"]:focus {
-    border-color: var(--sonar-blue);
-    box-shadow: 0 0 15px rgba(0,207,255,0.2);
-  }
-
-  input[type="text"]::placeholder {
-    color: rgba(0,207,255,0.25);
-    font-family: 'Share Tech Mono', monospace;
-    letter-spacing: 0.05em;
-  }
-
-  /* BUTTONS */
-  .btn {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.15em;
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-transform: uppercase;
-    border-radius: 1px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,0.08);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.2s;
-  }
-
-  .btn:hover::before { transform: scaleX(1); }
-
-  .btn-primary {
-    background: rgba(0,207,255,0.15);
-    border: 1px solid var(--sonar-blue);
-    color: var(--sonar-blue);
-  }
-
-  .btn-primary:hover {
-    background: rgba(0,207,255,0.25);
-    box-shadow: 0 0 20px rgba(0,207,255,0.3);
-  }
-
-  .btn-danger {
-    background: rgba(255,34,68,0.15);
-    border: 1px solid var(--danger-red);
-    color: var(--danger-red);
-  }
-
-  .btn-danger:hover {
-    background: rgba(255,34,68,0.25);
-    box-shadow: 0 0 20px rgba(255,34,68,0.3);
-  }
-
-  .btn-success {
-    background: rgba(0,255,136,0.15);
-    border: 1px solid var(--radar-green);
-    color: var(--radar-green);
-    width: 100%;
-    padding: 14px;
-    font-size: 0.75rem;
-  }
-
-  .btn-success:hover {
-    background: rgba(0,255,136,0.25);
-    box-shadow: 0 0 20px rgba(0,255,136,0.3);
-  }
-
-  .btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-
-  .btn-copy {
-    background: rgba(200,168,75,0.1);
-    border: 1px solid var(--hull-gold);
-    color: var(--hull-gold);
-    font-size: 0.6rem;
-    padding: 6px 12px;
-    white-space: nowrap;
-  }
-
-  /* STATUS BAR */
-  #status-bar {
-    background: rgba(0,0,0,0.5);
-    border: 1px solid var(--border-glow);
-    padding: 10px 16px;
-    font-size: 0.7rem;
-    letter-spacing: 0.08em;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    border-radius: 2px;
-  }
-
-  .status-indicator {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    animation: pulse 2s infinite;
-  }
-
-  .status-indicator.green { background: var(--radar-green); box-shadow: 0 0 8px var(--radar-green); }
-  .status-indicator.red { background: var(--danger-red); box-shadow: 0 0 8px var(--danger-red); animation: none; }
-  .status-indicator.yellow { background: var(--hull-gold); box-shadow: 0 0 8px var(--hull-gold); }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  /* GAME SCREEN */
-  #game-screen { display: none; }
-
-  .game-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  @media (max-width: 700px) {
-    .game-layout { grid-template-columns: 1fr; }
-  }
-
-  .board-section { }
-
-  .board-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .board-title .indicator {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-  }
-
-  .my-board-title .indicator { background: var(--radar-green); box-shadow: 0 0 6px var(--radar-green); }
-  .enemy-board-title .indicator { background: var(--danger-red); box-shadow: 0 0 6px var(--danger-red); }
-
-  /* GRID */
-  .grid-wrapper {
-    display: inline-block;
-    position: relative;
-  }
-
-  .grid-labels-row {
-    display: flex;
-    padding-left: 22px;
-    margin-bottom: 3px;
-  }
-
-  .grid-label {
-    font-size: 0.55rem;
-    color: rgba(0,207,255,0.4);
-    letter-spacing: 0;
-    text-align: center;
-  }
-
-  .grid-row { display: flex; align-items: center; margin-bottom: 2px; }
-
-  .row-label {
-    font-size: 0.55rem;
-    color: rgba(0,207,255,0.4);
-    width: 18px;
-    text-align: right;
-    margin-right: 4px;
-    flex-shrink: 0;
-  }
-
-  .cell {
-    border: 1px solid rgba(0,207,255,0.12);
-    background: rgba(2,12,24,0.6);
-    cursor: default;
-    transition: background 0.12s, border-color 0.12s;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.7rem;
-  }
-
-  .cell.ship {
-    background: rgba(0,255,136,0.08);
-    border-color: rgba(0,255,136,0.3);
-  }
-
-  .cell.hit {
-    background: rgba(255,34,68,0.2);
-    border-color: var(--danger-red);
-  }
-
-  .cell.hit::after {
-    content: '✕';
-    color: var(--danger-red);
-    font-size: 0.8em;
-    text-shadow: 0 0 8px var(--danger-red);
-  }
-
-  .cell.miss {
-    background: rgba(50,70,90,0.3);
-    border-color: var(--miss-grey);
-  }
-
-  .cell.miss::after {
-    content: '·';
-    color: var(--miss-grey);
-    font-size: 1.2em;
-  }
-
-  .cell.ship-hit {
-    background: rgba(255,34,68,0.3);
-    border-color: var(--danger-red);
-  }
-
-  .cell.ship-hit::after {
-    content: '✕';
-    color: var(--danger-red);
-    font-size: 0.8em;
-    text-shadow: 0 0 8px var(--danger-red);
-  }
-
-  .cell.sunk {
-    background: rgba(255,34,68,0.5) !important;
-    border-color: var(--danger-red) !important;
-  }
-
-  .cell.sunk::after {
-    content: '✕';
-    color: #fff !important;
-    font-size: 0.8em;
-  }
-
-  /* Enemy board targeting */
-  #enemy-grid .cell:not(.hit):not(.miss) {
-    cursor: crosshair;
-  }
-
-  #enemy-grid .cell:not(.hit):not(.miss):hover {
-    background: rgba(255,34,68,0.15);
-    border-color: rgba(255,34,68,0.5);
-    box-shadow: inset 0 0 8px rgba(255,34,68,0.2);
-  }
-
-  /* PLACEMENT SCREEN */
-  #placement-screen { display: none; }
-
-  .placement-layout {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 24px;
-    align-items: start;
-  }
-
-  @media (max-width: 700px) {
-    .placement-layout { grid-template-columns: 1fr; }
-  }
-
-  .ship-list { min-width: 180px; }
-
-  .ship-item {
-    padding: 10px 12px;
-    border: 1px solid rgba(0,207,255,0.15);
-    margin-bottom: 6px;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: 1px;
-  }
-
-  .ship-item:hover:not(.placed) {
-    border-color: var(--sonar-blue);
-    background: rgba(0,207,255,0.08);
-  }
-
-  .ship-item.selected {
-    border-color: var(--radar-green);
-    background: rgba(0,255,136,0.08);
-    box-shadow: 0 0 12px rgba(0,255,136,0.15);
-  }
-
-  .ship-item.placed {
-    border-color: rgba(0,255,136,0.2);
-    background: rgba(0,255,136,0.04);
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .ship-name { font-size: 0.7rem; letter-spacing: 0.05em; }
-  .ship-size {
-    font-size: 0.6rem;
-    opacity: 0.5;
-    display: flex;
-    gap: 2px;
-  }
-
-  .ship-dot {
-    width: 6px; height: 6px;
-    border: 1px solid currentColor;
-    border-radius: 1px;
-  }
-
-  /* Placement grid hover */
-  #placement-grid .cell.preview {
-    background: rgba(0,207,255,0.15);
-    border-color: rgba(0,207,255,0.5);
-  }
-
-  #placement-grid .cell.preview-invalid {
-    background: rgba(255,34,68,0.15);
-    border-color: rgba(255,34,68,0.4);
-  }
-
-  .placement-controls {
-    display: flex;
-    gap: 10px;
-    margin-top: 16px;
-    flex-wrap: wrap;
-  }
-
-  /* LOG */
-  #battle-log {
-    margin-top: 16px;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(0,207,255,0.1);
-    padding: 12px 14px;
-    height: 120px;
-    overflow-y: auto;
-    border-radius: 2px;
-  }
-
-  .log-entry {
-    font-size: 0.65rem;
-    letter-spacing: 0.05em;
-    line-height: 1.8;
-    opacity: 0.8;
-    border-bottom: 1px solid rgba(0,207,255,0.05);
-    padding: 1px 0;
-  }
-
-  .log-entry.hit { color: var(--danger-red); opacity: 1; }
-  .log-entry.miss { color: var(--miss-grey); }
-  .log-entry.sunk { color: var(--hull-gold); opacity: 1; font-weight: bold; }
-  .log-entry.info { color: var(--sonar-blue); }
-
-  /* TURN INDICATOR */
-  #turn-indicator {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.15em;
-    padding: 10px 16px;
-    border-radius: 2px;
-    text-align: center;
-    margin-bottom: 16px;
-    transition: all 0.3s;
-  }
-
-  #turn-indicator.my-turn {
-    background: rgba(0,255,136,0.08);
-    border: 1px solid rgba(0,255,136,0.3);
-    color: var(--radar-green);
-    text-shadow: 0 0 10px var(--radar-green);
-    animation: turnPulse 1.5s infinite;
-  }
-
-  #turn-indicator.enemy-turn {
-    background: rgba(255,34,68,0.05);
-    border: 1px solid rgba(255,34,68,0.2);
-    color: rgba(255,34,68,0.7);
-  }
-
-  @keyframes turnPulse {
-    0%, 100% { box-shadow: 0 0 10px rgba(0,255,136,0.1); }
-    50% { box-shadow: 0 0 25px rgba(0,255,136,0.3); }
-  }
-
-  /* STATS */
-  .stats-row {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-
-  .stat-box {
-    flex: 1;
-    min-width: 80px;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid rgba(0,207,255,0.1);
-    padding: 10px;
-    text-align: center;
-    border-radius: 2px;
-  }
-
-  .stat-value {
-    font-family: 'Orbitron', monospace;
-    font-size: 1.4rem;
-    font-weight: 700;
-    display: block;
-  }
-
-  .stat-label {
-    font-size: 0.55rem;
-    letter-spacing: 0.15em;
-    opacity: 0.5;
-    margin-top: 2px;
-    display: block;
-  }
-
-  .stat-hits .stat-value { color: var(--danger-red); text-shadow: 0 0 10px var(--danger-red); }
-  .stat-misses .stat-value { color: var(--miss-grey); }
-  .stat-sunk .stat-value { color: var(--hull-gold); text-shadow: 0 0 10px var(--hull-gold); }
-
-  /* MODAL */
-  #modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #modal-overlay.show { display: flex; }
-
-  .modal {
-    background: var(--ocean-mid);
-    border: 1px solid var(--sonar-blue);
-    padding: 40px;
-    text-align: center;
-    max-width: 400px;
-    box-shadow: 0 0 60px rgba(0,207,255,0.2);
-    position: relative;
-  }
-
-  .modal h2 {
-    font-family: 'Orbitron', monospace;
-    font-size: 1.5rem;
-    margin-bottom: 16px;
-    letter-spacing: 0.1em;
-  }
-
-  .modal.win h2 { color: var(--radar-green); text-shadow: 0 0 20px var(--radar-green); }
-  .modal.lose h2 { color: var(--danger-red); text-shadow: 0 0 20px var(--danger-red); }
-
-  .modal p {
-    font-size: 0.75rem;
-    opacity: 0.7;
-    margin-bottom: 24px;
-    line-height: 1.8;
-  }
-
-  /* WAITING */
-  #waiting-msg {
-    text-align: center;
-    padding: 30px;
-    font-size: 0.75rem;
-    opacity: 0.6;
-    letter-spacing: 0.1em;
-    display: none;
-  }
-
-  .waiting-spinner {
-    display: inline-block;
-    width: 30px; height: 30px;
-    border: 2px solid rgba(0,207,255,0.1);
-    border-top-color: var(--sonar-blue);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 12px;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* EXPLOSIONS */
-  @keyframes explode {
-    0% { transform: scale(0); opacity: 1; }
-    60% { transform: scale(1.5); opacity: 0.8; }
-    100% { transform: scale(2); opacity: 0; }
-  }
-
-  .explosion {
-    position: absolute;
-    pointer-events: none;
-    width: 100%;
-    height: 100%;
-    top: 0; left: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: explode 0.4s forwards;
-    z-index: 10;
-    font-size: 1.2em;
-  }
-
-  /* INSTRUCTIONS */
-  .instructions {
-    font-size: 0.62rem;
-    opacity: 0.5;
-    letter-spacing: 0.05em;
-    line-height: 1.9;
-    margin-top: 8px;
-  }
-
-  /* Separator */
-  .sep {
-    border: none;
-    border-top: 1px solid rgba(0,207,255,0.08);
-    margin: 16px 0;
-  }
-
-  .flex-gap { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(0,207,255,0.3); border-radius: 2px; }
-
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+:root{--deep:#020c18;--mid:#041e36;--green:#00ff88;--red:#ff2244;--blue:#00cfff;--grey:#334455;--gold:#c8a84b;--panel:rgba(4,30,54,.88);--glow:rgba(0,207,255,.3);}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{min-height:100%;overflow-x:hidden;}
+body{background:var(--deep);color:var(--blue);font-family:'Share Tech Mono',monospace;position:relative;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,207,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,207,255,.04) 1px,transparent 1px);background-size:40px 40px;animation:gd 20s linear infinite;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 4px);pointer-events:none;z-index:1;}
+@keyframes gd{0%{background-position:0 0}100%{background-position:40px 40px}}
+#app{position:relative;z-index:2;max-width:1140px;margin:0 auto;padding:10px 14px 50px;}
+
+/* HEADER */
+header{text-align:center;padding:16px 0 12px;border-bottom:1px solid var(--glow);margin-bottom:16px;position:relative;}
+header::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:200px;height:1px;background:var(--blue);box-shadow:0 0 20px var(--blue);}
+.title{font-family:'Orbitron',monospace;font-size:clamp(1.5rem,5vw,2.7rem);font-weight:900;letter-spacing:.14em;color:var(--blue);text-shadow:0 0 28px var(--blue),0 0 55px rgba(0,207,255,.28);}
+.subtitle{font-size:.62rem;letter-spacing:.32em;color:var(--green);margin-top:3px;text-shadow:0 0 10px var(--green);}
+#snd-btn{position:absolute;top:14px;right:0;background:rgba(0,207,255,.08);border:1px solid rgba(0,207,255,.22);color:var(--blue);font-family:'Orbitron',monospace;font-size:.52rem;letter-spacing:.08em;padding:5px 9px;cursor:pointer;border-radius:2px;transition:all .15s;}
+#snd-btn:hover{background:rgba(0,207,255,.18);}
+
+/* PANELS */
+.panel{background:var(--panel);border:1px solid var(--glow);border-radius:2px;padding:16px;position:relative;backdrop-filter:blur(4px);}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--blue),transparent);opacity:.45;}
+.plabel{font-family:'Orbitron',monospace;font-size:.56rem;letter-spacing:.26em;color:var(--blue);opacity:.6;margin-bottom:9px;}
+
+/* STATUS */
+#statusbar{display:none;background:rgba(0,0,0,.5);border:1px solid var(--glow);padding:7px 13px;font-size:.63rem;letter-spacing:.06em;align-items:center;gap:9px;margin-bottom:14px;border-radius:2px;}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;animation:pulse 2s infinite;}
+.sdot.g{background:var(--green);box-shadow:0 0 8px var(--green);}
+.sdot.r{background:var(--red);box-shadow:0 0 8px var(--red);animation:none;}
+.sdot.y{background:var(--gold);box-shadow:0 0 8px var(--gold);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* LOBBY */
+#lobby{max-width:500px;margin:28px auto;}
+#lobby h2{font-family:'Orbitron',monospace;font-size:.88rem;color:var(--gold);text-shadow:0 0 10px var(--gold);margin-bottom:16px;letter-spacing:.1em;}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.mbtn{padding:13px;font-family:'Orbitron',monospace;font-size:.62rem;letter-spacing:.09em;border:1px solid var(--glow);background:rgba(0,207,255,.06);color:var(--blue);cursor:pointer;border-radius:2px;transition:all .15s;text-align:center;touch-action:manipulation;}
+.mbtn:hover,.mbtn.active{background:rgba(0,207,255,.17);border-color:var(--blue);box-shadow:0 0 15px rgba(0,207,255,.18);}
+.micon{font-size:1.3rem;display:block;margin-bottom:5px;}
+.csec{margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid rgba(0,207,255,.1);}
+.csec:last-child{border-bottom:none;margin-bottom:0;}
+.clbl{font-size:.58rem;letter-spacing:.2em;color:var(--blue);opacity:.5;margin-bottom:7px;}
+.idbox{background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.2);padding:11px 13px;border-radius:2px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+.idval{font-family:'Orbitron',monospace;font-size:clamp(.78rem,2.5vw,.98rem);color:var(--green);text-shadow:0 0 10px var(--green);flex:1;word-break:break-all;letter-spacing:.07em;}
+.ld::after{content:'';animation:dots 1.5s infinite;}
+@keyframes dots{0%{content:'.'}33%{content:'..'}66%{content:'...'}100%{content:''}}
+.diff-row{display:flex;gap:7px;flex-wrap:wrap;}
+.dbtn{flex:1;min-width:72px;padding:7px;font-family:'Orbitron',monospace;font-size:.53rem;letter-spacing:.07em;border:1px solid rgba(0,207,255,.2);background:rgba(0,0,0,.3);color:var(--blue);cursor:pointer;border-radius:2px;transition:all .15s;text-align:center;touch-action:manipulation;}
+.dbtn:hover,.dbtn.sel{border-color:var(--gold);background:rgba(200,168,75,.1);color:var(--gold);}
+
+/* INPUTS */
+input[type=text]{width:100%;background:rgba(0,0,0,.4);border:1px solid rgba(0,207,255,.28);color:var(--blue);font-family:'Share Tech Mono',monospace;font-size:.82rem;padding:9px 11px;outline:none;transition:border-color .2s,box-shadow .2s;border-radius:2px;}
+input[type=text]:focus{border-color:var(--blue);box-shadow:0 0 11px rgba(0,207,255,.18);}
+input[type=text]::placeholder{color:rgba(0,207,255,.2);}
+
+/* BUTTONS */
+.btn{font-family:'Orbitron',monospace;font-size:.62rem;letter-spacing:.11em;padding:8px 16px;border:none;cursor:pointer;transition:all .15s;text-transform:uppercase;border-radius:1px;position:relative;overflow:hidden;touch-action:manipulation;}
+.btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.07);transform:scaleX(0);transform-origin:left;transition:transform .2s;}
+.btn:hover::before{transform:scaleX(1);}
+.btn-p{background:rgba(0,207,255,.13);border:1px solid var(--blue);color:var(--blue);}
+.btn-p:hover{background:rgba(0,207,255,.22);box-shadow:0 0 17px rgba(0,207,255,.26);}
+.btn-d{background:rgba(255,34,68,.12);border:1px solid var(--red);color:var(--red);}
+.btn-d:hover{background:rgba(255,34,68,.22);box-shadow:0 0 17px rgba(255,34,68,.26);}
+.btn-g{background:rgba(200,168,75,.1);border:1px solid var(--gold);color:var(--gold);font-size:.56rem;padding:5px 9px;}
+.btn-g:hover{background:rgba(200,168,75,.2);}
+.btn-s{background:rgba(0,255,136,.12);border:1px solid var(--green);color:var(--green);width:100%;padding:12px;font-size:.68rem;}
+.btn-s:hover{background:rgba(0,255,136,.21);box-shadow:0 0 17px rgba(0,255,136,.26);}
+.btn:disabled{opacity:.25;cursor:not-allowed;}
+.fg{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.mt{margin-top:9px;}
+.hint{font-size:.58rem;opacity:.42;letter-spacing:.04em;line-height:1.9;margin-top:5px;}
+
+/* PLACEMENT */
+#ps{display:none;}
+.playout{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;}
+@media(max-width:580px){.playout{grid-template-columns:1fr;}.slist{order:2;}.pright{order:1;}}
+.slist{min-width:160px;}
+.sitem{padding:7px 9px;border:1px solid rgba(0,207,255,.13);margin-bottom:4px;cursor:pointer;transition:all .14s;display:flex;justify-content:space-between;align-items:center;border-radius:1px;touch-action:manipulation;}
+.sitem:hover:not(.placed){border-color:var(--blue);background:rgba(0,207,255,.07);}
+.sitem.sel{border-color:var(--green);background:rgba(0,255,136,.07);box-shadow:0 0 9px rgba(0,255,136,.13);}
+.sitem.placed{border-color:rgba(0,255,136,.17);opacity:.42;cursor:not-allowed;}
+.sname{font-size:.63rem;letter-spacing:.04em;}
+.sdots{display:flex;gap:2px;}
+.sdot2{width:5px;height:5px;border:1px solid currentColor;border-radius:1px;}
+.pctrl{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;}
+
+/* GRIDS */
+.gw{display:inline-block;position:relative;}
+.glr{display:flex;padding-left:20px;margin-bottom:2px;}
+.gl{font-size:.48rem;color:rgba(0,207,255,.32);text-align:center;}
+.grow{display:flex;align-items:center;margin-bottom:1px;}
+.rl{font-size:.48rem;color:rgba(0,207,255,.32);width:17px;text-align:right;margin-right:3px;flex-shrink:0;}
+.cell{border:1px solid rgba(0,207,255,.1);background:rgba(2,12,24,.6);cursor:default;transition:background .1s,border-color .1s;position:relative;display:flex;align-items:center;justify-content:center;touch-action:manipulation;}
+.cell.ship{background:rgba(0,255,136,.07);border-color:rgba(0,255,136,.26);}
+.cell.hit{background:rgba(255,34,68,.17);border-color:var(--red);}
+.cell.hit::after{content:'✕';color:var(--red);font-size:.72em;text-shadow:0 0 5px var(--red);}
+.cell.miss{background:rgba(50,70,90,.26);border-color:var(--grey);}
+.cell.miss::after{content:'·';color:var(--grey);font-size:1.2em;}
+.cell.shiphit{background:rgba(255,34,68,.26);border-color:var(--red);}
+.cell.shiphit::after{content:'✕';color:var(--red);font-size:.72em;text-shadow:0 0 5px var(--red);}
+.cell.sunk{background:rgba(255,34,68,.42)!important;border-color:var(--red)!important;}
+.cell.sunk::after{content:'✕';color:#fff!important;font-size:.72em;}
+.cell.prev{background:rgba(0,207,255,.12);border-color:rgba(0,207,255,.42);}
+.cell.previnv{background:rgba(255,34,68,.12);border-color:rgba(255,34,68,.36);}
+#eg .cell:not(.hit):not(.miss){cursor:crosshair;}
+#eg .cell:not(.hit):not(.miss):hover{background:rgba(255,34,68,.11);border-color:rgba(255,34,68,.4);box-shadow:inset 0 0 6px rgba(255,34,68,.16);}
+
+/* WAITING */
+#wm{display:none;text-align:center;padding:26px;font-size:.7rem;opacity:.58;letter-spacing:.1em;}
+.spin{display:inline-block;width:26px;height:26px;border:2px solid rgba(0,207,255,.1);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:9px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* GAME */
+#gs{display:none;}
+#ti{font-family:'Orbitron',monospace;font-size:.63rem;letter-spacing:.13em;padding:8px 13px;border-radius:2px;text-align:center;margin-bottom:12px;transition:all .3s;}
+#ti.mt2{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.26);color:var(--green);text-shadow:0 0 8px var(--green);animation:tp 1.5s infinite;}
+#ti.et{background:rgba(255,34,68,.04);border:1px solid rgba(255,34,68,.17);color:rgba(255,34,68,.7);}
+@keyframes tp{0%,100%{box-shadow:0 0 7px rgba(0,255,136,.1)}50%{box-shadow:0 0 20px rgba(0,255,136,.26)}}
+.srow{display:flex;gap:11px;margin-bottom:12px;flex-wrap:wrap;}
+.sbox{flex:1;min-width:65px;background:rgba(0,0,0,.3);border:1px solid rgba(0,207,255,.09);padding:7px;text-align:center;border-radius:2px;}
+.sv{font-family:'Orbitron',monospace;font-size:1.25rem;font-weight:700;display:block;}
+.sl{font-size:.5rem;letter-spacing:.12em;opacity:.42;margin-top:1px;display:block;}
+.sh .sv{color:var(--red);text-shadow:0 0 7px var(--red);}
+.sm .sv{color:var(--grey);}
+.sk .sv{color:var(--gold);text-shadow:0 0 7px var(--gold);}
+.glayout{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+@media(max-width:650px){.glayout{grid-template-columns:1fr;}}
+.btitle{font-family:'Orbitron',monospace;font-size:.58rem;letter-spacing:.16em;margin-bottom:7px;display:flex;align-items:center;gap:7px;}
+.bind{width:5px;height:5px;border-radius:50%;}
+.mybt .bind{background:var(--green);box-shadow:0 0 5px var(--green);}
+.enbt .bind{background:var(--red);box-shadow:0 0 5px var(--red);}
+
+/* CHAT */
+#chat{margin-top:13px;display:none;}
+#chat h3{font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:.18em;color:var(--gold);margin-bottom:7px;}
+#clog{background:rgba(0,0,0,.36);border:1px solid rgba(0,207,255,.09);padding:9px 11px;height:92px;overflow-y:auto;border-radius:2px;margin-bottom:7px;}
+.cmsg{font-size:.6rem;line-height:1.7;padding:1px 0;border-bottom:1px solid rgba(0,207,255,.04);}
+.cmsg.me{color:var(--green);}
+.cmsg.them{color:var(--gold);}
+.cmsg.sys{color:rgba(0,207,255,.42);font-style:italic;}
+.crow{display:flex;gap:7px;}
+.crow input{font-size:.68rem;padding:6px 9px;}
+
+/* BATTLE LOG */
+#blog{margin-top:11px;background:rgba(0,0,0,.36);border:1px solid rgba(0,207,255,.08);padding:9px 11px;height:95px;overflow-y:auto;border-radius:2px;}
+.le{font-size:.6rem;letter-spacing:.04em;line-height:1.75;opacity:.75;border-bottom:1px solid rgba(0,207,255,.04);padding:1px 0;}
+.le.hit{color:var(--red);opacity:1;}
+.le.miss{color:var(--grey);}
+.le.sunk{color:var(--gold);opacity:1;}
+.le.info{color:var(--blue);}
+
+/* FX */
+@keyframes expl{0%{transform:scale(.2);opacity:1}60%{transform:scale(1.6);opacity:.9}100%{transform:scale(2.2);opacity:0}}
+@keyframes rpl{0%{transform:scale(0);opacity:.85}100%{transform:scale(3);opacity:0}}
+.efx{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;animation:expl .44s forwards;z-index:10;font-size:1.05em;}
+.rfx{position:absolute;inset:0;border-radius:50%;border:2px solid var(--blue);animation:rpl .5s forwards;pointer-events:none;z-index:10;}
+
+/* AI thinking */
+#ait{display:none;text-align:center;font-size:.62rem;letter-spacing:.11em;color:var(--red);opacity:.78;margin:3px 0;animation:pulse 1s infinite;}
+
+/* MODAL */
+#mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100;align-items:center;justify-content:center;}
+#mo.show{display:flex;}
+.modal{background:var(--mid);border:1px solid var(--blue);padding:32px;text-align:center;max-width:360px;width:90%;box-shadow:0 0 55px rgba(0,207,255,.18);border-radius:2px;}
+.modal h2{font-family:'Orbitron',monospace;font-size:1.35rem;margin-bottom:11px;letter-spacing:.1em;}
+.modal.win h2{color:var(--green);text-shadow:0 0 17px var(--green);}
+.modal.lose h2{color:var(--red);text-shadow:0 0 17px var(--red);}
+.modal p{font-size:.68rem;opacity:.62;margin-bottom:16px;line-height:1.8;}
+.mstats{font-family:'Orbitron',monospace;font-size:.7rem;color:var(--gold);margin-bottom:16px;line-height:2;}
+
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(0,207,255,.26);border-radius:2px;}
+
+/* Touch hint */
+.th{display:none;font-size:.56rem;opacity:.38;letter-spacing:.04em;margin-top:5px;text-align:center;}
+@media(hover:none){.th{display:block;}}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
-    <div class="title">Xenfulz:NAVAL STRIKE</div>
-    <div class="subtitle">TACTICAL FLEET COMBAT SYSTEM // P2P MULTIPLAYER</div>
+    <div class="title">⚓ NAVAL STRIKE</div>
+    <div class="subtitle">TACTICAL FLEET COMBAT // MULTIPLAYER + AI</div>
+    <button id="snd-btn" onclick="toggleSnd()">🔊 SFX ON</button>
   </header>
 
-  <!-- Status Bar (always visible after init) -->
-  <div id="status-bar" style="display:none;">
-    <div class="status-indicator" id="status-dot"></div>
-    <span id="status-text">—</span>
+  <div id="statusbar">
+    <div class="sdot g" id="sdot"></div>
+    <span id="stxt">—</span>
   </div>
 
-  <!-- CONNECTION SCREEN -->
-  <div id="connection-screen" class="panel">
-    <h2>// ESTABLISH SECURE LINK</h2>
-
-    <div class="conn-section">
-      <div class="conn-label">▸ YOUR VESSEL ID</div>
-      <div class="your-id-box">
-        <span class="your-id-value" id="my-peer-id"><span class="loading-dots">ACQUIRING SIGNAL</span></span>
-        <button class="btn btn-copy" id="copy-btn" onclick="copyId()" disabled>COPY ID</button>
-      </div>
-      <div class="instructions">Share this ID with your opponent so they can connect to you.</div>
+  <!-- LOBBY -->
+  <div id="lobby" class="panel">
+    <h2>// SELECT BATTLE MODE</h2>
+    <div class="mode-grid">
+      <button class="mbtn active" id="m-ai" onclick="setMode('ai')"><span class="micon">🤖</span>VS COMPUTER</button>
+      <button class="mbtn" id="m-hm" onclick="setMode('human')"><span class="micon">👥</span>VS PLAYER</button>
     </div>
 
-    <div class="conn-section">
-      <div class="conn-label">▸ CONNECT TO OPPONENT</div>
-      <input type="text" id="remote-id-input" placeholder="Enter opponent's vessel ID…" autocomplete="off" spellcheck="false">
-      <div style="margin-top:10px;">
-        <button class="btn btn-primary" id="connect-btn" onclick="connectToPeer()" disabled>ESTABLISH LINK</button>
+    <!-- AI OPTIONS -->
+    <div id="ai-opts" class="csec" style="display:block;">
+      <div class="clbl">▸ DIFFICULTY</div>
+      <div class="diff-row">
+        <button class="dbtn sel" id="d-easy" onclick="setDiff('easy')">CADET</button>
+        <button class="dbtn" id="d-med" onclick="setDiff('medium')">CAPTAIN</button>
+        <button class="dbtn" id="d-hard" onclick="setDiff('hard')">ADMIRAL</button>
       </div>
-      <div class="instructions">Enter your opponent's ID and click to connect. One player connects, the other waits.</div>
+      <div class="hint" style="margin-top:8px;">Admiral uses hunt/target AI — it methodically tracks and sinks ships.</div>
+      <button class="btn btn-s" onclick="startAI()" style="margin-top:10px;">⚡ START AI BATTLE</button>
     </div>
-  </div>
 
-  <!-- PLACEMENT SCREEN -->
-  <div id="placement-screen" class="panel">
-    <h2 style="font-family:'Orbitron',monospace;font-size:0.9rem;color:var(--hull-gold);letter-spacing:0.12em;margin-bottom:16px;">// DEPLOY YOUR FLEET</h2>
-
-    <div class="placement-layout">
-      <div class="ship-list">
-        <div class="panel-label">SELECT VESSEL</div>
-        <div id="ship-list-items"></div>
-        <hr class="sep">
-        <div class="placement-controls">
-          <button class="btn btn-primary" onclick="rotateShip()" style="font-size:0.6rem;padding:8px 14px;">⟳ ROTATE</button>
-          <button class="btn btn-danger" onclick="resetPlacement()" style="font-size:0.6rem;padding:8px 14px;">↺ RESET</button>
+    <!-- HUMAN OPTIONS -->
+    <div id="hm-opts" style="display:none;">
+      <div class="csec">
+        <div class="clbl">▸ YOUR VESSEL ID</div>
+        <div class="idbox">
+          <span class="idval" id="pid"><span class="ld">ACQUIRING SIGNAL</span></span>
+          <button class="btn btn-g" id="cbtn" onclick="copyId()" disabled>COPY</button>
         </div>
-        <div class="instructions" style="margin-top:12px;">
-          1. Select a vessel<br>
-          2. Hover over board to preview<br>
-          3. Click to place<br>
-          4. Press ROTATE to change orientation
-        </div>
+        <div class="hint">Share this ID with your opponent so they can connect.</div>
       </div>
-
-      <div>
-        <div class="panel-label">TACTICAL GRID — YOUR WATERS</div>
-        <div class="grid-wrapper" id="placement-grid-wrapper"></div>
-        <div style="margin-top:16px;">
-          <button class="btn btn-success" id="ready-btn" onclick="confirmPlacement()" disabled>⚡ READY FOR BATTLE</button>
-        </div>
+      <div class="csec">
+        <div class="clbl">▸ CONNECT TO OPPONENT</div>
+        <input type="text" id="rid" placeholder="Paste opponent's vessel ID…" autocomplete="off" spellcheck="false">
+        <div class="mt"><button class="btn btn-p" id="cnbtn" onclick="connectPeer()" disabled>ESTABLISH LINK</button></div>
+        <div class="hint">One player connects; the other waits for the incoming link.</div>
       </div>
     </div>
   </div>
 
-  <!-- WAITING MESSAGE -->
-  <div id="waiting-msg" class="panel" style="display:none;">
-    <div class="waiting-spinner"></div>
+  <!-- PLACEMENT -->
+  <div id="ps" class="panel">
+    <h2 style="font-family:'Orbitron',monospace;font-size:.82rem;color:var(--gold);letter-spacing:.09em;margin-bottom:13px;">// DEPLOY YOUR FLEET</h2>
+    <div class="playout">
+      <div class="slist">
+        <div class="plabel">SELECT VESSEL</div>
+        <div id="sli"></div>
+        <hr style="border:none;border-top:1px solid rgba(0,207,255,.07);margin:11px 0;">
+        <div class="pctrl">
+          <button class="btn btn-p" onclick="rot()" style="font-size:.56rem;padding:6px 11px;">⟳ ROTATE</button>
+          <button class="btn btn-d" onclick="resetP()" style="font-size:.56rem;padding:6px 11px;">↺ RESET</button>
+        </div>
+        <button class="btn btn-g" onclick="rndP()" style="width:100%;margin-top:7px;text-align:center;padding:7px;">🎲 RANDOM DEPLOY</button>
+        <div class="hint" style="margin-top:9px;">Select a vessel, then tap the grid to place it. Use ROTATE to change orientation.</div>
+        <div class="th">Tap ship → tap grid to place</div>
+      </div>
+      <div class="pright">
+        <div class="plabel">TACTICAL GRID</div>
+        <div id="pgw"></div>
+        <button class="btn btn-s" id="rbtn" onclick="confirm()" disabled style="margin-top:11px;">⚡ READY FOR BATTLE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAITING -->
+  <div id="wm" class="panel">
+    <div class="spin"></div>
     <div>AWAITING OPPONENT FLEET DEPLOYMENT…</div>
-    <div style="font-size:0.6rem;opacity:0.4;margin-top:8px;letter-spacing:0.05em;">Both commanders must ready before battle begins</div>
+    <div style="font-size:.56rem;opacity:.36;margin-top:5px;">Both commanders must ready before battle begins</div>
   </div>
 
-  <!-- GAME SCREEN -->
-  <div id="game-screen">
-    <div id="turn-indicator">—</div>
-
-    <div class="stats-row">
-      <div class="stat-box stat-hits"><span class="stat-value" id="stat-hits">0</span><span class="stat-label">HITS</span></div>
-      <div class="stat-box stat-misses"><span class="stat-value" id="stat-misses">0</span><span class="stat-label">MISSES</span></div>
-      <div class="stat-box stat-sunk"><span class="stat-value" id="stat-sunk">0</span><span class="stat-label">SUNK</span></div>
+  <!-- GAME -->
+  <div id="gs">
+    <div id="ti">—</div>
+    <div id="ait">🤖 AI IS CALCULATING STRIKE…</div>
+    <div class="srow">
+      <div class="sbox sh"><span class="sv" id="s-h">0</span><span class="sl">HITS</span></div>
+      <div class="sbox sm"><span class="sv" id="s-m">0</span><span class="sl">MISSES</span></div>
+      <div class="sbox sk"><span class="sv" id="s-k">0</span><span class="sl">SUNK</span></div>
+      <div class="sbox"><span class="sv" id="s-a" style="color:var(--blue);">—</span><span class="sl">ACCURACY</span></div>
     </div>
-
-    <div class="game-layout">
-      <div class="board-section">
-        <div class="board-title my-board-title"><div class="indicator"></div> MY FLEET</div>
-        <div class="grid-wrapper" id="my-grid-wrapper"></div>
+    <div class="glayout">
+      <div>
+        <div class="btitle mybt"><div class="bind"></div> MY FLEET</div>
+        <div id="mgw"></div>
       </div>
-      <div class="board-section">
-        <div class="board-title enemy-board-title"><div class="indicator"></div> ENEMY WATERS</div>
-        <div class="grid-wrapper" id="enemy-grid-wrapper"></div>
+      <div>
+        <div class="btitle enbt"><div class="bind"></div> <span id="enlbl">ENEMY WATERS</span></div>
+        <div id="egw"></div>
+        <div class="th">Tap a cell to fire</div>
       </div>
     </div>
-
-    <div id="battle-log"></div>
+    <!-- CHAT (multiplayer) -->
+    <div id="chat" class="panel">
+      <h3>// RADIO COMMS</h3>
+      <div id="clog"></div>
+      <div class="crow">
+        <input type="text" id="ci" placeholder="Transmit message…" maxlength="120" onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn btn-p" onclick="sendChat()" style="padding:6px 12px;font-size:.56rem;white-space:nowrap;">SEND</button>
+      </div>
+    </div>
+    <div id="blog"></div>
   </div>
 
   <!-- MODAL -->
-  <div id="modal-overlay">
-    <div class="modal" id="modal">
-      <h2 id="modal-title">—</h2>
-      <p id="modal-body">—</p>
-      <button class="btn btn-primary" onclick="location.reload()">⟳ PLAY AGAIN</button>
+  <div id="mo">
+    <div class="modal" id="mdl">
+      <h2 id="mt2">—</h2>
+      <p id="mb">—</p>
+      <div class="mstats" id="ms"></div>
+      <button class="btn btn-p" onclick="location.reload()">⟳ PLAY AGAIN</button>
     </div>
   </div>
 </div>
 
 <script>
-// ============================
-// GAME CONSTANTS
-// ============================
-const GRID_SIZE = 10;
-const COLS = 'ABCDEFGHIJ';
-const SHIPS = [
-  { name: 'CARRIER',     size: 5 },
-  { name: 'BATTLESHIP',  size: 4 },
-  { name: 'CRUISER',     size: 3 },
-  { name: 'SUBMARINE',   size: 3 },
-  { name: 'DESTROYER',   size: 2 },
-];
+// ── CONSTANTS ──────────────────────────────────────────
+const G=10, COLS='ABCDEFGHIJ';
+const SHIPS=[{name:'CARRIER',size:5},{name:'BATTLESHIP',size:4},{name:'CRUISER',size:3},{name:'SUBMARINE',size:3},{name:'DESTROYER',size:2}];
 
-// ============================
-// STATE
-// ============================
-let peer = null;
-let conn = null;
-let myId = null;
+// ── AUDIO ENGINE ────────────────────────────────────────
+let actx=null, sndOn=true;
+function ac(){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();return actx;}
+function tone(f,t,d,v=.28,dc=true){
+  if(!sndOn)return;
+  try{const c=ac(),o=c.createOscillator(),g=c.createGain();
+  o.connect(g);g.connect(c.destination);
+  o.type=t;o.frequency.value=f;
+  g.gain.setValueAtTime(v,c.currentTime);
+  if(dc)g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);
+  o.start();o.stop(c.currentTime+d);}catch(e){}}
+function noise(d,v=.14){
+  if(!sndOn)return;
+  try{const c=ac(),n=c.sampleRate*d,b=c.createBuffer(1,n,c.sampleRate),dt=b.getChannelData(0);
+  for(let i=0;i<n;i++)dt[i]=Math.random()*2-1;
+  const s=c.createBufferSource();s.buffer=b;
+  const g=c.createGain();g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);
+  s.connect(g);g.connect(c.destination);s.start();s.stop(c.currentTime+d);}catch(e){}}
+const SFX={
+  click(){tone(440,'square',.07,.13);},
+  place(){tone(330,'sine',.14,.18);setTimeout(()=>tone(500,'sine',.1,.1),80);},
+  fire(){tone(180,'sawtooth',.09,.22);noise(.13,.09);},
+  miss(){tone(220,'sine',.38,.18);setTimeout(()=>tone(170,'sine',.55,.09),120);},
+  hit(){noise(.11,.28);tone(110,'sawtooth',.28,.28);setTimeout(()=>tone(75,'sine',.45,.18),80);},
+  sunk(){[200,155,115,95].forEach((f,i)=>setTimeout(()=>tone(f,'sawtooth',.38,.32),i*75));noise(.45,.22);},
+  win(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,'sine',.48,.28),i*110));},
+  lose(){[200,175,145,115].forEach((f,i)=>setTimeout(()=>tone(f,'sawtooth',.55,.28),i*145));},
+  conn(){[330,440,550].forEach((f,i)=>setTimeout(()=>tone(f,'sine',.18,.18),i*90));},
+  chat(){tone(880,'sine',.11,.13);},
+  inc(){tone(300,'sine',.09,.18);setTimeout(()=>tone(250,'sine',.19,.13),90);},
+};
+function toggleSnd(){sndOn=!sndOn;document.getElementById('snd-btn').textContent=sndOn?'🔊 SFX ON':'🔇 SFX OFF';}
 
-// Placement
-let placedShips = [];      // [{name, size, cells:[{r,c}]}]
-let selectedShipIdx = null;
-let isHorizontal = true;
-let placementGrid = [];    // 2D array of 0/1
+// ── STATE ──────────────────────────────────────────────
+let mode='ai',diff='easy';
+let peer=null,conn=null,myId=null;
+let placed=[],selShip=null,horiz=true,pg=[];
+let myB=[],myBH=[],enB=[],myShips=[],myShipC=[];
+let enRem=SHIPS.length,myRem=SHIPS.length;
+let myTurn=false,over=false,myRdy=false,opRdy=false;
+let stats={h:0,m:0,k:0};
+let aiTgts=[],aiHits=[],aiHist=new Set();
 
-// Game
-let myBoard = [];           // 0=water,1=ship
-let myBoardHit = [];        // track what's been hit on my board
-let enemyBoard = [];        // track my shots: 0=none,1=miss,2=hit
-let myShipCells = [];       // [{r,c,name}]
-let myShips = [];           // copy of SHIPS for sunk tracking
-let enemyShipsRemaining = SHIPS.length;
-let myShipsRemaining = SHIPS.length;
-let isMyTurn = false;
-let gameOver = false;
-let myReady = false;
-let opponentReady = false;
-
-let stats = { hits: 0, misses: 0, sunk: 0 };
-
-// Cells sizing
-function cellSize() {
-  return window.innerWidth < 500 ? 28 : 36;
+// ── MODE / DIFFICULTY ──────────────────────────────────
+function setMode(m){
+  SFX.click();mode=m;
+  document.getElementById('m-ai').classList.toggle('active',m==='ai');
+  document.getElementById('m-hm').classList.toggle('active',m==='human');
+  document.getElementById('ai-opts').style.display=m==='ai'?'block':'none';
+  document.getElementById('hm-opts').style.display=m==='human'?'block':'none';
+  if(m==='human'&&!peer)initPeer();
+}
+function setDiff(d){
+  SFX.click();diff=d;
+  ['easy','med','hard'].forEach(x=>document.getElementById('d-'+x).classList.toggle('sel',x===d.replace('medium','med')));
 }
 
-// ============================
-// PEER SETUP
-// ============================
-function initPeer() {
-  peer = new Peer(undefined, {
-    config: {
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-      ]
-    }
-  });
-
-  peer.on('open', id => {
-    myId = id;
-    document.getElementById('my-peer-id').textContent = id;
-    document.getElementById('copy-btn').disabled = false;
-    document.getElementById('connect-btn').disabled = false;
-    setStatus('green', 'SIGNAL ACQUIRED — READY TO LINK');
-    showStatusBar();
-  });
-
-  peer.on('connection', c => {
-    if (conn) { c.close(); return; }
-    setupConnection(c);
-    setStatus('green', 'INCOMING LINK FROM ENEMY VESSEL');
-  });
-
-  peer.on('error', err => {
-    setStatus('red', 'SIGNAL ERROR: ' + err.type.toUpperCase());
-    console.error(err);
-  });
+// ── PEER ───────────────────────────────────────────────
+function initPeer(){
+  peer=new Peer(undefined,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}});
+  peer.on('open',id=>{myId=id;document.getElementById('pid').textContent=id;document.getElementById('cbtn').disabled=false;document.getElementById('cnbtn').disabled=false;sts('g','SIGNAL ACQUIRED');showSB();});
+  peer.on('connection',c=>{if(conn){c.close();return;}setupConn(c);});
+  peer.on('error',e=>sts('r','ERROR: '+e.type.toUpperCase()));
 }
-
-function connectToPeer() {
-  const remoteId = document.getElementById('remote-id-input').value.trim();
-  if (!remoteId || remoteId === myId) return;
-  const c = peer.connect(remoteId, { reliable: true });
-  setStatus('yellow', 'ESTABLISHING LINK…');
-  setupConnection(c);
+function connectPeer(){
+  const id=document.getElementById('rid').value.trim();
+  if(!id||id===myId)return;
+  SFX.click();sts('y','ESTABLISHING LINK…');
+  setupConn(peer.connect(id,{reliable:true}));
 }
-
-function setupConnection(c) {
-  conn = c;
-  conn.on('open', () => {
-    setStatus('green', 'SECURE LINK ESTABLISHED // DEPLOY FLEET');
-    showPlacementScreen();
-  });
-  conn.on('data', handleMessage);
-  conn.on('close', () => {
-    if (!gameOver) {
-      setStatus('red', 'CONNECTION LOST');
-      showModal(false, 'CONNECTION LOST', 'Your opponent has disconnected from battle.');
-    }
-  });
-  conn.on('error', err => {
-    setStatus('red', 'LINK ERROR');
-    console.error(err);
-  });
+function setupConn(c){
+  conn=c;
+  conn.on('open',()=>{SFX.conn();sts('g','SECURE LINK ESTABLISHED');document.getElementById('lobby').style.display='none';showPS();});
+  conn.on('data',handleMsg);
+  conn.on('close',()=>{if(!over){sts('r','CONNECTION LOST');showModal(false,'SIGNAL LOST','Opponent disconnected.');}});
+  conn.on('error',()=>sts('r','LINK ERROR'));
 }
-
-function send(msg) {
-  if (conn && conn.open) conn.send(msg);
-}
-
-// ============================
-// MESSAGING
-// ============================
-function handleMessage(msg) {
-  switch(msg.type) {
-    case 'READY':
-      opponentReady = true;
-      checkBothReady();
-      break;
-    case 'FIRST':
-      // msg.first = true means I go first
-      isMyTurn = msg.first;
-      startGame();
-      break;
-    case 'SHOT':
-      receiveShot(msg.r, msg.c);
-      break;
-    case 'RESULT':
-      receiveShotResult(msg);
-      break;
+function snd(msg){if(conn&&conn.open)conn.send(msg);}
+function handleMsg(msg){
+  switch(msg.type){
+    case'READY':opRdy=true;checkRdy();break;
+    case'FIRST':myTurn=msg.first;startGame();break;
+    case'SHOT':recvShot(msg.r,msg.c);break;
+    case'RESULT':recvResult(msg);break;
+    case'CHAT':SFX.chat();appendChat(msg.text,'them');break;
   }
 }
+function copyId(){navigator.clipboard.writeText(myId).then(()=>{const b=document.getElementById('cbtn');b.textContent='COPIED!';setTimeout(()=>b.textContent='COPY',1500);});}
 
-// ============================
-// STATUS BAR
-// ============================
-function showStatusBar() {
-  document.getElementById('status-bar').style.display = 'flex';
+// ── STATUS BAR ─────────────────────────────────────────
+function showSB(){document.getElementById('statusbar').style.display='flex';}
+function sts(c,t){document.getElementById('sdot').className='sdot '+c;document.getElementById('stxt').textContent=t;}
+
+// ── PLACEMENT ──────────────────────────────────────────
+function showPS(){
+  pg=Array.from({length:G},()=>Array(G).fill(0));placed=[];
+  document.getElementById('ps').style.display='block';
+  renderSL();renderPG();
 }
-
-function setStatus(color, text) {
-  const dot = document.getElementById('status-dot');
-  dot.className = 'status-indicator ' + color;
-  document.getElementById('status-text').textContent = text;
-}
-
-function copyId() {
-  navigator.clipboard.writeText(myId).then(() => {
-    const btn = document.getElementById('copy-btn');
-    btn.textContent = 'COPIED!';
-    setTimeout(() => btn.textContent = 'COPY ID', 1500);
+function renderSL(){
+  const c=document.getElementById('sli');c.innerHTML='';
+  SHIPS.forEach((s,i)=>{
+    const isp=placed.some(p=>p.name===s.name);
+    const d=document.createElement('div');
+    d.className='sitem'+(isp?' placed':'')+(selShip===i&&!isp?' sel':'');
+    d.innerHTML=`<span class="sname">${s.name}</span><span class="sdots">${Array(s.size).fill('<span class="sdot2"></span>').join('')}</span>`;
+    if(!isp){d.onclick=()=>{SFX.click();selShip=i;renderSL();};}
+    c.appendChild(d);
   });
 }
-
-// ============================
-// PLACEMENT SCREEN
-// ============================
-function showPlacementScreen() {
-  document.getElementById('connection-screen').style.display = 'none';
-  document.getElementById('placement-screen').style.display = 'block';
-  placementGrid = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(0));
-  renderShipList();
-  renderPlacementGrid();
-}
-
-function renderShipList() {
-  const container = document.getElementById('ship-list-items');
-  container.innerHTML = '';
-  SHIPS.forEach((ship, idx) => {
-    const placed = placedShips.some(p => p.name === ship.name);
-    const div = document.createElement('div');
-    div.className = 'ship-item' + (placed ? ' placed' : '') + (selectedShipIdx === idx && !placed ? ' selected' : '');
-    div.innerHTML = `
-      <span class="ship-name">${ship.name}</span>
-      <span class="ship-size">${Array(ship.size).fill('<span class="ship-dot"></span>').join('')}</span>
-    `;
-    if (!placed) div.onclick = () => selectShip(idx);
-    container.appendChild(div);
-  });
-}
-
-function selectShip(idx) {
-  selectedShipIdx = idx;
-  renderShipList();
-}
-
-function rotateShip() {
-  isHorizontal = !isHorizontal;
-  renderShipList();
-}
-
-function getCells(r, c, size, horiz) {
-  const cells = [];
-  for (let i = 0; i < size; i++) {
-    cells.push(horiz ? {r, c: c+i} : {r: r+i, c});
-  }
-  return cells;
-}
-
-function isValidPlacement(cells) {
-  for (const {r, c} of cells) {
-    if (r < 0 || r >= GRID_SIZE || c < 0 || c >= GRID_SIZE) return false;
-    if (placementGrid[r][c]) return false;
-    // Check adjacency
-    for (let dr = -1; dr <= 1; dr++) {
-      for (let dc = -1; dc <= 1; dc++) {
-        const nr = r+dr, nc = c+dc;
-        if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE && placementGrid[nr][nc]) return false;
-      }
-    }
+function rot(){SFX.click();horiz=!horiz;}
+function cells(r,c,sz,h){return Array.from({length:sz},(_,i)=>h?{r,c:c+i}:{r:r+i,c});}
+function validP(cs,grid){
+  for(const {r,c} of cs){
+    if(r<0||r>=G||c<0||c>=G||grid[r][c])return false;
+    for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const nr=r+dr,nc=c+dc;if(nr>=0&&nr<G&&nc>=0&&nc<G&&grid[nr][nc])return false;}
   }
   return true;
 }
-
-function renderPlacementGrid() {
-  const wrapper = document.getElementById('placement-grid-wrapper');
-  wrapper.innerHTML = '';
-  const cs = cellSize();
-
-  // Column labels
-  const labelsRow = document.createElement('div');
-  labelsRow.className = 'grid-labels-row';
-  labelsRow.style.paddingLeft = '22px';
-  COLS.split('').forEach(ch => {
-    const lbl = document.createElement('div');
-    lbl.className = 'grid-label';
-    lbl.style.width = cs + 'px';
-    lbl.textContent = ch;
-    labelsRow.appendChild(lbl);
-  });
-  wrapper.appendChild(labelsRow);
-
-  const gridDiv = document.createElement('div');
-  gridDiv.id = 'placement-grid';
-
-  for (let r = 0; r < GRID_SIZE; r++) {
-    const row = document.createElement('div');
-    row.className = 'grid-row';
-
-    const rowLbl = document.createElement('div');
-    rowLbl.className = 'row-label';
-    rowLbl.textContent = r+1;
-    row.appendChild(rowLbl);
-
-    for (let c = 0; c < GRID_SIZE; c++) {
-      const cell = document.createElement('div');
-      cell.className = 'cell' + (placementGrid[r][c] ? ' ship' : '');
-      cell.style.width = cell.style.height = cs + 'px';
-      cell.dataset.r = r;
-      cell.dataset.c = c;
-
-      cell.addEventListener('mouseenter', () => previewPlacement(r, c));
-      cell.addEventListener('click', () => placeShip(r, c));
+function renderPG(){
+  const w=document.getElementById('pgw');w.innerHTML='';
+  const cs=csz();w.appendChild(mkLbls(cs));
+  const grid=document.createElement('div');grid.id='pg';
+  for(let r=0;r<G;r++){
+    const row=document.createElement('div');row.className='grow';
+    const rl=document.createElement('div');rl.className='rl';rl.textContent=r+1;row.appendChild(rl);
+    for(let c=0;c<G;c++){
+      const cell=document.createElement('div');
+      cell.className='cell'+(pg[r][c]?' ship':'');
+      cell.style.width=cell.style.height=cs+'px';
+      cell.dataset.r=r;cell.dataset.c=c;
+      cell.addEventListener('mouseenter',()=>prevP(r,c));
+      cell.addEventListener('click',()=>placeS(r,c));
+      cell.addEventListener('touchend',e=>{e.preventDefault();placeS(r,c);},{passive:false});
       row.appendChild(cell);
     }
-    gridDiv.appendChild(row);
+    grid.appendChild(row);
   }
-
-  gridDiv.addEventListener('mouseleave', clearPreview);
-  wrapper.appendChild(gridDiv);
+  grid.addEventListener('mouseleave',clrPrev);
+  w.appendChild(grid);
 }
-
-function previewPlacement(r, c) {
-  if (selectedShipIdx === null) return;
-  const ship = SHIPS[selectedShipIdx];
-  if (placedShips.some(p => p.name === ship.name)) return;
-
-  clearPreview();
-  const cells = getCells(r, c, ship.size, isHorizontal);
-  const valid = isValidPlacement(cells);
-  cells.forEach(({r, c}) => {
-    const cell = getPlacementCell(r, c);
-    if (cell) cell.classList.add(valid ? 'preview' : 'preview-invalid');
-  });
+function prevP(r,c){
+  if(selShip===null)return;
+  const s=SHIPS[selShip];if(placed.some(p=>p.name===s.name))return;
+  clrPrev();
+  const cs2=cells(r,c,s.size,horiz);const v=validP(cs2,pg);
+  cs2.forEach(({r,c})=>{const el=pcell(r,c);if(el)el.classList.add(v?'prev':'previnv');});
 }
-
-function clearPreview() {
-  document.querySelectorAll('#placement-grid .cell').forEach(c => {
-    c.classList.remove('preview', 'preview-invalid');
-  });
+function clrPrev(){document.querySelectorAll('#pg .cell').forEach(c=>c.classList.remove('prev','previnv'));}
+function placeS(r,c){
+  if(selShip===null)return;
+  const s=SHIPS[selShip];if(placed.some(p=>p.name===s.name))return;
+  const cs2=cells(r,c,s.size,horiz);if(!validP(cs2,pg))return;
+  SFX.place();
+  cs2.forEach(({r,c})=>pg[r][c]=1);
+  placed.push({name:s.name,size:s.size,cells:cs2});
+  selShip=null;renderPG();renderSL();
+  if(placed.length===SHIPS.length)document.getElementById('rbtn').disabled=false;
 }
-
-function placeShip(r, c) {
-  if (selectedShipIdx === null) return;
-  const ship = SHIPS[selectedShipIdx];
-  if (placedShips.some(p => p.name === ship.name)) return;
-  const cells = getCells(r, c, ship.size, isHorizontal);
-  if (!isValidPlacement(cells)) return;
-
-  cells.forEach(({r, c}) => placementGrid[r][c] = 1);
-  placedShips.push({name: ship.name, size: ship.size, cells});
-  selectedShipIdx = null;
-
-  renderPlacementGrid();
-  renderShipList();
-
-  if (placedShips.length === SHIPS.length) {
-    document.getElementById('ready-btn').disabled = false;
-  }
+function resetP(){
+  SFX.click();placed=[];pg=Array.from({length:G},()=>Array(G).fill(0));selShip=null;
+  document.getElementById('rbtn').disabled=true;renderPG();renderSL();
 }
-
-function resetPlacement() {
-  placedShips = [];
-  placementGrid = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(0));
-  selectedShipIdx = null;
-  document.getElementById('ready-btn').disabled = true;
-  renderPlacementGrid();
-  renderShipList();
-}
-
-function getPlacementCell(r, c) {
-  return document.querySelector(`#placement-grid .cell[data-r="${r}"][data-c="${c}"]`);
-}
-
-function confirmPlacement() {
-  if (placedShips.length < SHIPS.length) return;
-  myReady = true;
-
-  // Build my board arrays
-  myBoard = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(0));
-  myBoardHit = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(false));
-  myShipCells = [];
-  placedShips.forEach(s => {
-    s.cells.forEach(({r,c}) => {
-      myBoard[r][c] = 1;
-      myShipCells.push({r, c, name: s.name});
-    });
-  });
-
-  enemyBoard = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(0));
-
-  // Track sunk status
-  myShips = SHIPS.map(s => ({
-    ...s,
-    hits: 0,
-    sunk: false,
-    cells: placedShips.find(p => p.name === s.name).cells
-  }));
-
-  send({type: 'READY'});
-  document.getElementById('placement-screen').style.display = 'none';
-  document.getElementById('waiting-msg').style.display = 'block';
-  checkBothReady();
-}
-
-function checkBothReady() {
-  if (myReady && opponentReady) {
-    document.getElementById('waiting-msg').style.display = 'none';
-    // Randomly decide who goes first (only initiator decides)
-    // We use a coin flip: both sides get different roles
-    // The peer who initiated the connection decides
-    const iAmInitiator = conn.peer !== myId && conn._open;
-    // Actually: determine by peer IDs lexicographic comparison
-    const iDecide = myId < conn.peer;
-    if (iDecide) {
-      const iGoFirst = Math.random() < 0.5;
-      send({type: 'FIRST', first: !iGoFirst});
-      isMyTurn = iGoFirst;
-      startGame();
+function rndP(){
+  SFX.click();resetP();
+  const grid=Array.from({length:G},()=>Array(G).fill(0)),pl=[];
+  for(const s of SHIPS){
+    let ok=false,tr=0;
+    while(!ok&&tr++<300){
+      const h=Math.random()<.5,r=Math.floor(Math.random()*G),c=Math.floor(Math.random()*G);
+      const cs2=cells(r,c,s.size,h);
+      if(validP(cs2,grid)){cs2.forEach(({r,c})=>grid[r][c]=1);pl.push({name:s.name,size:s.size,cells:cs2});ok=true;}
     }
-    // Other side waits for FIRST message
   }
+  placed=pl;pg=pl.reduce((g,s)=>{s.cells.forEach(({r,c})=>g[r][c]=1);return g;},Array.from({length:G},()=>Array(G).fill(0)));
+  document.getElementById('rbtn').disabled=false;renderPG();renderSL();
+}
+function pcell(r,c){return document.querySelector(`#pg .cell[data-r="${r}"][data-c="${c}"]`);}
+function buildB(){
+  myB=Array.from({length:G},()=>Array(G).fill(0));
+  myBH=Array.from({length:G},()=>Array(G).fill(false));
+  myShipC=[];
+  placed.forEach(s=>s.cells.forEach(({r,c})=>{myB[r][c]=1;myShipC.push({r,c,name:s.name});}));
+  enB=Array.from({length:G},()=>Array(G).fill(0));
+  myShips=SHIPS.map(s=>({...s,hits:0,sunk:false,cells:placed.find(p=>p.name===s.name).cells}));
+  enRem=SHIPS.length;myRem=SHIPS.length;
+}
+function confirm(){
+  if(placed.length<SHIPS.length)return;
+  SFX.click();myRdy=true;buildB();
+  if(mode==='ai'){startAIBattle();}
+  else{snd({type:'READY'});document.getElementById('ps').style.display='none';document.getElementById('wm').style.display='block';checkRdy();}
+}
+function checkRdy(){
+  if(!myRdy||!opRdy)return;
+  document.getElementById('wm').style.display='none';
+  const iDecide=myId<conn.peer;
+  if(iDecide){const iFirst=Math.random()<.5;snd({type:'FIRST',first:!iFirst});myTurn=iFirst;startGame();}
 }
 
-// ============================
-// GAME
-// ============================
-function startGame() {
-  document.getElementById('game-screen').style.display = 'block';
-  document.getElementById('waiting-msg').style.display = 'none';
-  renderMyGrid();
-  renderEnemyGrid();
-  updateTurnIndicator();
-  setStatus('green', isMyTurn ? 'YOUR TURN — OPEN FIRE' : 'ENEMY TURN — STANDBY');
-  logEntry('⚡ BATTLE COMMENCED — ALL HANDS TO STATIONS', 'info');
+// ── AI SETUP ───────────────────────────────────────────
+function aiPlace(){
+  const grid=Array.from({length:G},()=>Array(G).fill(0)),pl=[];
+  for(const s of SHIPS){
+    let ok=false,tr=0;
+    while(!ok&&tr++<300){
+      const h=Math.random()<.5,r=Math.floor(Math.random()*G),c=Math.floor(Math.random()*G);
+      const cs2=cells(r,c,s.size,h);
+      if(validP(cs2,grid)){cs2.forEach(({r,c})=>grid[r][c]=1);pl.push({name:s.name,size:s.size,cells:cs2});ok=true;}
+    }
+  }
+  return pl;
+}
+function startAIBattle(){
+  document.getElementById('ps').style.display='none';
+  const apl=aiPlace();
+  window.aiB=Array.from({length:G},()=>Array(G).fill(0));
+  window.aiSh=SHIPS.map(s=>({...s,hits:0,sunk:false,cells:apl.find(p=>p.name===s.name).cells}));
+  apl.forEach(s=>s.cells.forEach(({r,c})=>window.aiB[r][c]=1));
+  aiHist=new Set();aiTgts=[];aiHits=[];
+  myTurn=true;
+  document.getElementById('enlbl').textContent='🤖 AI FLEET';
+  document.getElementById('chat').style.display='none';
+  startGame();
 }
 
-function renderMyGrid() {
-  const wrapper = document.getElementById('my-grid-wrapper');
-  wrapper.innerHTML = '';
-  const cs = cellSize();
+// ── GAME START ─────────────────────────────────────────
+function startGame(){
+  document.getElementById('gs').style.display='block';
+  document.getElementById('wm').style.display='none';
+  stats={h:0,m:0,k:0};
+  if(mode==='human')document.getElementById('chat').style.display='block';
+  renderMG();renderEG();updateTI();
+  sts('g',myTurn?'YOUR TURN — OPEN FIRE':'ENEMY TURN — STANDBY');
+  log('⚡ BATTLE COMMENCED — ALL HANDS TO STATIONS','info');
+  if(mode==='ai'&&!myTurn)setTimeout(aiTurn,900);
+}
 
-  const labelsRow = makeLabelsRow(cs);
-  wrapper.appendChild(labelsRow);
-
-  const gridDiv = document.createElement('div');
-  gridDiv.id = 'my-grid';
-
-  for (let r = 0; r < GRID_SIZE; r++) {
-    const row = document.createElement('div');
-    row.className = 'grid-row';
-    const rowLbl = document.createElement('div');
-    rowLbl.className = 'row-label';
-    rowLbl.textContent = r+1;
-    row.appendChild(rowLbl);
-
-    for (let c = 0; c < GRID_SIZE; c++) {
-      const cell = document.createElement('div');
-      cell.className = 'cell' + (myBoard[r][c] ? ' ship' : '');
-      cell.style.width = cell.style.height = cs + 'px';
-      cell.id = `my-${r}-${c}`;
+// ── GRID RENDER ────────────────────────────────────────
+function csz(){return window.innerWidth<480?24:32;}
+function mkLbls(cs){
+  const r=document.createElement('div');r.className='glr';
+  COLS.split('').forEach(ch=>{const l=document.createElement('div');l.className='gl';l.style.width=cs+'px';l.textContent=ch;r.appendChild(l);});
+  return r;
+}
+function renderMG(){
+  const w=document.getElementById('mgw');w.innerHTML='';
+  const cs=csz();w.appendChild(mkLbls(cs));
+  const g=document.createElement('div');g.id='mg';
+  for(let r=0;r<G;r++){
+    const row=document.createElement('div');row.className='grow';
+    const rl=document.createElement('div');rl.className='rl';rl.textContent=r+1;row.appendChild(rl);
+    for(let c=0;c<G;c++){
+      const cell=document.createElement('div');
+      cell.className='cell'+(myB[r][c]?' ship':'');
+      cell.style.width=cell.style.height=cs+'px';
+      cell.id=`my-${r}-${c}`;row.appendChild(cell);
+    }
+    g.appendChild(row);
+  }
+  w.appendChild(g);
+}
+function renderEG(){
+  const w=document.getElementById('egw');w.innerHTML='';
+  const cs=csz();w.appendChild(mkLbls(cs));
+  const g=document.createElement('div');g.id='eg';
+  for(let r=0;r<G;r++){
+    const row=document.createElement('div');row.className='grow';
+    const rl=document.createElement('div');rl.className='rl';rl.textContent=r+1;row.appendChild(rl);
+    for(let c=0;c<G;c++){
+      const cell=document.createElement('div');
+      cell.className='cell';cell.style.width=cell.style.height=cs+'px';
+      cell.id=`en-${r}-${c}`;cell.dataset.r=r;cell.dataset.c=c;
+      cell.addEventListener('click',()=>fire(r,c));
+      cell.addEventListener('touchend',e=>{e.preventDefault();fire(r,c);},{passive:false});
       row.appendChild(cell);
     }
-    gridDiv.appendChild(row);
+    g.appendChild(row);
   }
-  wrapper.appendChild(gridDiv);
+  w.appendChild(g);
 }
 
-function renderEnemyGrid() {
-  const wrapper = document.getElementById('enemy-grid-wrapper');
-  wrapper.innerHTML = '';
-  const cs = cellSize();
-
-  const labelsRow = makeLabelsRow(cs);
-  wrapper.appendChild(labelsRow);
-
-  const gridDiv = document.createElement('div');
-  gridDiv.id = 'enemy-grid';
-
-  for (let r = 0; r < GRID_SIZE; r++) {
-    const row = document.createElement('div');
-    row.className = 'grid-row';
-    const rowLbl = document.createElement('div');
-    rowLbl.className = 'row-label';
-    rowLbl.textContent = r+1;
-    row.appendChild(rowLbl);
-
-    for (let c = 0; c < GRID_SIZE; c++) {
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      cell.style.width = cell.style.height = cs + 'px';
-      cell.id = `enemy-${r}-${c}`;
-      cell.dataset.r = r;
-      cell.dataset.c = c;
-      cell.onclick = () => fireShot(r, c);
-      row.appendChild(cell);
-    }
-    gridDiv.appendChild(row);
+// ── PLAYER FIRES ───────────────────────────────────────
+function fire(r,c){
+  if(!myTurn||over)return;
+  if(enB[r][c]!==0)return;
+  SFX.fire();
+  if(mode==='ai')playerVsAI(r,c);
+  else{enB[r][c]=-1;snd({type:'SHOT',r,c});myTurn=false;updateTI();sts('y','AWAITING CONFIRMATION…');}
+}
+function playerVsAI(r,c){
+  const hit=window.aiB[r][c]===1;
+  enB[r][c]=hit?2:1;
+  let sk=null,sc=null;
+  if(hit){const ship=window.aiSh.find(s=>s.cells.some(x=>x.r===r&&x.c===c));if(ship){ship.hits++;if(ship.hits>=ship.size){ship.sunk=true;sk=ship.name;sc=ship.cells;enRem--;}}}
+  const cell=document.getElementById(`en-${r}-${c}`);
+  if(cell){
+    cell.classList.add(hit?'hit':'miss');
+    if(hit){expl(cell);stats.h++;if(sk){SFX.sunk();stats.k++;sc.forEach(({r,c})=>{const s=document.getElementById(`en-${r}-${c}`);if(s)s.classList.add('sunk');});log(`💀 AI ${sk} SUNK!`,'sunk');}else{SFX.hit();log(`🎯 HIT at ${COLS[c]}${r+1}`,'hit');}}
+    else{rip(cell);SFX.miss();stats.m++;log(`• MISS at ${COLS[c]}${r+1}`,'miss');}
   }
-  wrapper.appendChild(gridDiv);
+  updSt();
+  if(enRem<=0){SFX.win();over=true;showModal(true,'VICTORY!','All AI vessels eliminated. Mission complete.');return;}
+  myTurn=false;updateTI();sts('y','AI CALCULATING…');
+  document.getElementById('ait').style.display='block';
+  const d=diff==='easy'?1300:diff==='medium'?850:520;
+  setTimeout(aiTurn,d+Math.random()*350);
 }
 
-function makeLabelsRow(cs) {
-  const labelsRow = document.createElement('div');
-  labelsRow.className = 'grid-labels-row';
-  COLS.split('').forEach(ch => {
-    const lbl = document.createElement('div');
-    lbl.className = 'grid-label';
-    lbl.style.width = cs + 'px';
-    lbl.textContent = ch;
-    labelsRow.appendChild(lbl);
-  });
-  return labelsRow;
-}
-
-function fireShot(r, c) {
-  if (!isMyTurn || gameOver) return;
-  if (enemyBoard[r][c] !== 0) return;
-
-  send({type: 'SHOT', r, c});
-  isMyTurn = false;
-  updateTurnIndicator();
-  setStatus('yellow', 'AWAITING SHOT CONFIRMATION…');
-
-  // Mark as "in flight" temporarily
-  enemyBoard[r][c] = -1;
-}
-
-function receiveShot(r, c) {
-  // Process shot on my board
-  const hit = myBoard[r][c] === 1;
-  myBoardHit[r][c] = true;
-
-  let sunkShipName = null;
-  let sunkCells = null;
-
-  if (hit) {
-    const ship = myShips.find(s => s.cells.some(cell => cell.r === r && cell.c === c));
-    if (ship) {
-      ship.hits++;
-      if (ship.hits >= ship.size) {
-        ship.sunk = true;
-        sunkShipName = ship.name;
-        sunkCells = ship.cells;
-        myShipsRemaining--;
-      }
-    }
+// ── AI LOGIC ───────────────────────────────────────────
+function aiTurn(){
+  if(over)return;
+  document.getElementById('ait').style.display='none';
+  SFX.inc();
+  let r,c;
+  if(diff==='easy'){({r,c}=aiRand());}
+  else{({r,c}=aiHT(diff==='hard'));}
+  aiHist.add(`${r},${c}`);
+  const hit=myB[r][c]===1;myBH[r][c]=true;
+  let sk=null,sc=null;
+  if(hit){
+    const ship=myShips.find(s=>s.cells.some(x=>x.r===r&&x.c===c));
+    if(ship){ship.hits++;if(ship.hits>=ship.size){ship.sunk=true;sk=ship.name;sc=ship.cells;myRem--;}}
+    if(diff!=='easy'){aiHits.push({r,c});if(!sk)addTgts(r,c);else{aiHits=[];aiTgts=[];}}
   }
-
-  send({
-    type: 'RESULT',
-    r, c,
-    hit,
-    sunk: sunkShipName,
-    sunkCells,
-    gameOver: myShipsRemaining <= 0
-  });
-
-  // Update my grid visual
-  const cell = document.getElementById(`my-${r}-${c}`);
-  if (cell) {
+  const cell=document.getElementById(`my-${r}-${c}`);
+  if(cell){
     cell.classList.remove('ship');
-    cell.classList.add(hit ? 'ship-hit' : 'miss');
-    if (sunkCells) {
-      sunkCells.forEach(({r, c}) => {
-        const sc = document.getElementById(`my-${r}-${c}`);
-        if (sc) { sc.className = 'cell sunk'; sc.style.width = sc.style.height = cellSize()+'px'; }
-      });
-    }
+    cell.classList.add(hit?(sc?'sunk':'shiphit'):'miss');
+    if(hit)expl(cell);else rip(cell);
+    if(sc)sc.forEach(({r,c})=>{const s=document.getElementById(`my-${r}-${c}`);if(s)s.classList.add('sunk');});
   }
-
-  if (myShipsRemaining <= 0) {
-    showModal(false, 'FLEET DESTROYED', 'Your fleet has been sunk. The enemy claims victory.');
-    gameOver = true;
-  } else {
-    isMyTurn = true;
-    updateTurnIndicator();
-    setStatus('green', 'RETURN FIRE — YOUR TURN');
-  }
+  if(hit)log(`⚠ AI HIT YOUR ${sk||'SHIP'} AT ${COLS[c]}${r+1}`,sk?'sunk':'hit');
+  else log(`AI MISSED AT ${COLS[c]}${r+1}`,'miss');
+  if(myRem<=0){SFX.lose();over=true;showModal(false,'FLEET DESTROYED','All your vessels have been sunk.');return;}
+  myTurn=true;updateTI();sts('g','RETURN FIRE — YOUR TURN');
 }
-
-function receiveShotResult(msg) {
-  const {r, c, hit, sunk, sunkCells, gameOver: opponentLost} = msg;
-
-  enemyBoard[r][c] = hit ? 2 : 1;
-
-  const cell = document.getElementById(`enemy-${r}-${c}`);
-  if (cell) {
-    cell.classList.add(hit ? 'hit' : 'miss');
-    if (hit) {
-      // Explosion effect
-      const exp = document.createElement('div');
-      exp.className = 'explosion';
-      exp.textContent = '💥';
-      cell.appendChild(exp);
-      setTimeout(() => exp.remove(), 500);
-
-      stats.hits++;
-      document.getElementById('stat-hits').textContent = stats.hits;
-
-      if (sunk) {
-        stats.sunk++;
-        document.getElementById('stat-sunk').textContent = stats.sunk;
-        enemyShipsRemaining--;
-        if (sunkCells) {
-          sunkCells.forEach(({r, c}) => {
-            const sc = document.getElementById(`enemy-${r}-${c}`);
-            if (sc) sc.classList.add('sunk');
-          });
-        }
-        logEntry(`💀 ENEMY ${sunk} SUNK!`, 'sunk');
-      } else {
-        logEntry(`🎯 HIT at ${COLS[c]}${r+1}`, 'hit');
-      }
-    } else {
-      stats.misses++;
-      document.getElementById('stat-misses').textContent = stats.misses;
-      logEntry(`• MISS at ${COLS[c]}${r+1}`, 'miss');
-    }
-  }
-
-  if (opponentLost) {
-    showModal(true, 'VICTORY!', 'All enemy vessels have been sunk. Naval superiority achieved.');
-    gameOver = true;
-  } else {
-    isMyTurn = false;
-    updateTurnIndicator();
-    setStatus('red', 'ENEMY TURN — BRACE FOR IMPACT');
+function aiRand(){let r,c;do{r=Math.floor(Math.random()*G);c=Math.floor(Math.random()*G);}while(aiHist.has(`${r},${c}`));return{r,c};}
+function addTgts(r,c){
+  if(aiHits.length>=2){
+    const h0=aiHits[0],h1=aiHits[aiHits.length-1];
+    const dr=Math.sign(h1.r-h0.r),dc=Math.sign(h1.c-h0.c);
+    [[dr,dc],[-dr,-dc]].forEach(([a,b])=>{
+      if(!a&&!b)return;
+      const nr=h1.r+a,nc=h1.c+b,k=`${nr},${nc}`;
+      if(nr>=0&&nr<G&&nc>=0&&nc<G&&!aiHist.has(k)&&!aiTgts.find(t=>t.r===nr&&t.c===nc))
+        aiTgts.unshift({r:nr,c:nc});
+    });
+  }else{
+    [[0,1],[0,-1],[1,0],[-1,0]].forEach(([a,b])=>{
+      const nr=r+a,nc=c+b,k=`${nr},${nc}`;
+      if(nr>=0&&nr<G&&nc>=0&&nc<G&&!aiHist.has(k)&&!aiTgts.find(t=>t.r===nr&&t.c===nc))
+        aiTgts.push({r:nr,c:nc});
+    });
   }
 }
+function aiHT(smart){
+  aiTgts=aiTgts.filter(t=>!aiHist.has(`${t.r},${t.c}`));
+  if(aiTgts.length>0)return aiTgts.shift();
+  const cands=[];
+  for(let r=0;r<G;r++)for(let c=0;c<G;c++){if(aiHist.has(`${r},${c}`))continue;if(!smart||(r+c)%2===0)cands.push({r,c});}
+  if(!cands.length)return aiRand();
+  return cands[Math.floor(Math.random()*cands.length)];
+}
 
-function updateTurnIndicator() {
-  const ind = document.getElementById('turn-indicator');
-  if (isMyTurn) {
-    ind.textContent = '▸ YOUR TURN — SELECT TARGET COORDINATES';
-    ind.className = 'my-turn';
-  } else {
-    ind.textContent = '⏳ ENEMY TURN — STANDBY FOR INCOMING';
-    ind.className = 'enemy-turn';
+// ── MULTIPLAYER SHOTS ──────────────────────────────────
+function recvShot(r,c){
+  const hit=myB[r][c]===1;myBH[r][c]=true;
+  let sk=null,sc=null;
+  if(hit){const ship=myShips.find(s=>s.cells.some(x=>x.r===r&&x.c===c));if(ship){ship.hits++;if(ship.hits>=ship.size){ship.sunk=true;sk=ship.name;sc=ship.cells;myRem--;}}}
+  snd({type:'RESULT',r,c,hit,sunk:sk,sunkCells:sc,gameOver:myRem<=0});
+  const cell=document.getElementById(`my-${r}-${c}`);
+  if(cell){cell.classList.remove('ship');cell.classList.add(hit?'shiphit':'miss');if(hit)expl(cell);else rip(cell);if(sc)sc.forEach(({r,c})=>{const s=document.getElementById(`my-${r}-${c}`);if(s)s.classList.add('sunk');});}
+  if(hit)log(`⚠ ENEMY HIT YOUR ${sk||'SHIP'} AT ${COLS[c]}${r+1}`,sk?'sunk':'hit');
+  else log(`ENEMY MISSED AT ${COLS[c]}${r+1}`,'miss');
+  if(myRem<=0){SFX.lose();over=true;showModal(false,'FLEET DESTROYED','All your vessels have been sunk.');return;}
+  myTurn=true;updateTI();sts('g','RETURN FIRE — YOUR TURN');
+}
+function recvResult(msg){
+  const{r,c,hit,sunk,sunkCells,gameOver:won}=msg;
+  enB[r][c]=hit?2:1;
+  const cell=document.getElementById(`en-${r}-${c}`);
+  if(cell){
+    cell.classList.add(hit?'hit':'miss');
+    if(hit){expl(cell);stats.h++;if(sunk){SFX.sunk();stats.k++;if(sunkCells)sunkCells.forEach(({r,c})=>{const s=document.getElementById(`en-${r}-${c}`);if(s)s.classList.add('sunk');});log(`💀 ENEMY ${sunk} SUNK!`,'sunk');}else{SFX.hit();log(`🎯 HIT at ${COLS[c]}${r+1}`,'hit');}}
+    else{rip(cell);SFX.miss();stats.m++;log(`• MISS at ${COLS[c]}${r+1}`,'miss');}
   }
+  updSt();
+  if(won){SFX.win();over=true;showModal(true,'VICTORY!','All enemy vessels sunk. Naval superiority achieved.');return;}
+  myTurn=false;updateTI();sts('r','ENEMY TURN — BRACE FOR IMPACT');
 }
 
-function logEntry(text, type='info') {
-  const log = document.getElementById('battle-log');
-  const entry = document.createElement('div');
-  entry.className = 'log-entry ' + type;
-  const time = new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-  entry.textContent = `[${time}] ${text}`;
-  log.appendChild(entry);
-  log.scrollTop = log.scrollHeight;
+// ── VISUAL FX ──────────────────────────────────────────
+function expl(cell){const e=document.createElement('div');e.className='efx';e.textContent='💥';cell.appendChild(e);setTimeout(()=>e.remove(),500);}
+function rip(cell){const e=document.createElement('div');e.className='rfx';cell.appendChild(e);setTimeout(()=>e.remove(),600);}
+
+// ── UI HELPERS ─────────────────────────────────────────
+function updateTI(){
+  const el=document.getElementById('ti');
+  if(myTurn){el.textContent='▸ YOUR TURN — SELECT TARGET';el.className='mt2';}
+  else{el.textContent=mode==='ai'?'⏳ AI IS TARGETING YOUR FLEET…':'⏳ ENEMY TURN — STANDBY';el.className='et';}
+}
+function updSt(){
+  document.getElementById('s-h').textContent=stats.h;
+  document.getElementById('s-m').textContent=stats.m;
+  document.getElementById('s-k').textContent=stats.k;
+  const t=stats.h+stats.m;
+  document.getElementById('s-a').textContent=t>0?Math.round(stats.h/t*100)+'%':'—';
+}
+function log(txt,type='info'){
+  const el=document.getElementById('blog'),e=document.createElement('div');
+  e.className='le '+type;
+  const t=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  e.textContent=`[${t}] ${txt}`;el.appendChild(e);el.scrollTop=el.scrollHeight;
+}
+function showModal(win,title,body){
+  document.getElementById('mt2').textContent=title;
+  document.getElementById('mb').textContent=body;
+  const t=stats.h+stats.m;
+  document.getElementById('ms').innerHTML=`HITS: ${stats.h} &nbsp;|&nbsp; MISSES: ${stats.m} &nbsp;|&nbsp; SUNK: ${stats.k}<br>ACCURACY: ${t>0?Math.round(stats.h/t*100)+'%':'—'}`;
+  document.getElementById('mdl').className='modal '+(win?'win':'lose');
+  document.getElementById('mo').classList.add('show');
+  log(win?'🏆 VICTORY — MISSION COMPLETE':'💀 DEFEAT — FLEET DESTROYED',win?'sunk':'hit');
 }
 
-function showModal(win, title, body) {
-  const overlay = document.getElementById('modal-overlay');
-  const modal = document.getElementById('modal');
-  document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-body').textContent = body;
-  modal.className = 'modal ' + (win ? 'win' : 'lose');
-  overlay.classList.add('show');
-  logEntry(win ? '🏆 VICTORY — MISSION COMPLETE' : '💀 DEFEAT — FLEET DESTROYED', win ? 'sunk' : 'hit');
+// ── CHAT ───────────────────────────────────────────────
+function sendChat(){
+  const inp=document.getElementById('ci'),txt=inp.value.trim();
+  if(!txt||!conn)return;
+  SFX.click();snd({type:'CHAT',text:txt});appendChat(txt,'me');inp.value='';
+}
+function appendChat(txt,who){
+  const el=document.getElementById('clog'),e=document.createElement('div');
+  e.className='cmsg '+who;e.textContent=`[${who==='me'?'YOU':'ENEMY'}] ${txt}`;
+  el.appendChild(e);el.scrollTop=el.scrollHeight;
 }
 
-// ============================
-// INIT
-// ============================
-initPeer();
+// ── INIT ───────────────────────────────────────────────
+// Default state already correct; AI mode showing
 </script>
 </body>
 </html>
