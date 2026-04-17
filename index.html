@@ -228,11 +228,13 @@ input::placeholder { color:rgba(154,138,106,.35); }
 .pctrl { display:flex; gap:7px; margin-top:11px; flex-wrap:wrap; }
 
 /* ── GRIDS ── */
+/* Row-label column is exactly 22px wide + 4px margin = 26px offset for letter labels */
+:root { --rl-w: 22px; --rl-gap: 4px; }
 .gw { display:inline-block; }
-.glr { display:flex; padding-left:calc(var(--cell-sz) * 0.55); margin-bottom:3px; }
-.gl { font-size:.62rem; color:var(--brass); text-align:center; font-weight:500; opacity:.8; }
+.glr { display:flex; padding-left:calc(var(--rl-w) + var(--rl-gap)); margin-bottom:3px; }
+.gl  { width:var(--cell-sz); font-size:.66rem; color:var(--brass); text-align:center; font-weight:600; opacity:.85; flex-shrink:0; }
 .grow { display:flex; align-items:center; margin-bottom:2px; }
-.rl { font-size:.62rem; color:var(--brass); width:calc(var(--cell-sz) * 0.52); text-align:right; margin-right:3px; flex-shrink:0; font-weight:500; opacity:.8; }
+.rl  { width:var(--rl-w); font-size:.66rem; color:var(--brass); text-align:right; margin-right:var(--rl-gap); flex-shrink:0; font-weight:600; opacity:.85; }
 
 /* cells */
 .cell {
@@ -249,15 +251,21 @@ input::placeholder { color:rgba(154,138,106,.35); }
   box-shadow:inset 0 0 6px rgba(78,207,138,.08);
 }
 
-/* X3N ghost — BRIGHT & clear */
+/* X3N ghost — faint pink, clearly visible enemy ship positions */
 .cell.ghost {
-  background:linear-gradient(135deg, rgba(200,68,34,.28) 0%, rgba(184,120,20,.18) 100%) !important;
-  border-color:rgba(220,100,40,.7) !important;
-  box-shadow:inset 0 0 8px rgba(200,68,34,.3), 0 0 6px rgba(200,68,34,.25) !important;
+  background: rgba(255, 182, 193, 0.22) !important;
+  border: 2px solid rgba(255, 130, 160, 0.75) !important;
+  box-shadow: inset 0 0 10px rgba(255, 100, 140, 0.35), 0 0 8px rgba(255, 100, 140, 0.3) !important;
 }
-.cell.ghost::before {
-  content:'▣'; color:rgba(230,120,60,.85); font-size:.6em;
-  position:absolute; text-shadow:0 0 6px rgba(230,100,50,.8);
+/* Pink dot in center of ghost cell */
+.cell.ghost::after {
+  content: '' !important;
+  position: absolute;
+  width: 40%; height: 40%;
+  background: rgba(255, 150, 180, 0.6);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(255, 130, 160, 0.8);
+  pointer-events: none;
 }
 
 .cell.hit {
@@ -291,10 +299,14 @@ input::placeholder { color:rgba(154,138,106,.35); }
 .cell.previnv { background:rgba(200,68,34,.18); border-color:rgba(200,68,34,.5); }
 
 #eg .cell:not(.hit):not(.miss) { cursor:crosshair; }
-#eg .cell:not(.hit):not(.miss):hover {
+#eg .cell:not(.hit):not(.miss):not(.ghost):hover {
   background:rgba(200,68,34,.18);
   border-color:rgba(220,80,40,.6);
   box-shadow:inset 0 0 10px rgba(200,68,34,.2);
+}
+#eg .cell.ghost:hover {
+  border-color: rgba(255, 160, 190, 0.95) !important;
+  box-shadow: inset 0 0 12px rgba(255, 100, 140, 0.5), 0 0 10px rgba(255, 100, 140, 0.4) !important;
 }
 
 /* ── WAITING ── */
@@ -730,8 +742,15 @@ function submitX3N(){
     x3nActive=true;
     closeX3N();
     document.getElementById('x3n-bar').style.display='block';
-    if(gameStarted)applyX3NGhosts();
-    log('⬡ X3N OVERRIDE ACTIVATED — ENEMY POSITIONS VISIBLE','sunk');
+    if(gameStarted){
+      // Multiplayer safeguard: enemy fleet data may not have arrived yet
+      if(mode==='human' && !mpFleetReceived){
+        log('⬡ X3N ACTIVE — AWAITING ENEMY FLEET DATA…','info');
+      } else {
+        applyX3NGhosts();
+        log('⬡ X3N OVERRIDE ACTIVATED — ENEMY POSITIONS NOW VISIBLE','sunk');
+      }
+    }
   } else {
     const err=document.getElementById('x3n-err');
     err.classList.add('show');
@@ -742,14 +761,24 @@ function submitX3N(){
 }
 function applyX3NGhosts(){
   if(!x3nActive) return;
-  const board = (mode==='ai') ? window.aiB : null;
-  if(!board) return;
+  // Resolve which board to use: AI board or received multiplayer fleet data
+  let board=null;
+  if(mode==='ai'){
+    if(!window.aiB) return;
+    board=window.aiB;
+  } else {
+    // Multiplayer: only reveal if we have received the opponent fleet data
+    if(!mpFleetReceived || !mpEnemyBoard) return;
+    board=mpEnemyBoard;
+  }
+  // Walk every cell; add ghost class to unshot enemy ship cells
   for(let r=0;r<G;r++){
     for(let c=0;c<G;c++){
-      if(board[r][c]===1 && enB[r][c]===0){
+      if(board[r][c]===1){
         const cell=document.getElementById(`en-${r}-${c}`);
-        if(cell && !cell.classList.contains('hit') && !cell.classList.contains('miss'))
+        if(cell && !cell.classList.contains('hit') && !cell.classList.contains('miss') && !cell.classList.contains('sunk')){
           cell.classList.add('ghost');
+        }
       }
     }
   }
@@ -771,6 +800,12 @@ let myTurn=false, over=false, myRdy=false, opRdy=false;
 let stats={h:0,m:0,k:0};
 let aiTgts=[], aiHits=[], aiHist=new Set();
 let gameStarted=false;
+
+// Multiplayer: opponent fleet board received via FLEET_DATA message.
+// 10x10 array (0=water, 1=ship). Used ONLY for X3N ghost rendering.
+// null until the FLEET_DATA message is received from the opponent.
+let mpEnemyBoard=null;
+let mpFleetReceived=false;
 
 // rematch
 let rematchVotes=0, myVotedRematch=false;
@@ -833,6 +868,7 @@ function snd(msg){if(conn&&conn.open) conn.send(msg);}
 function handleMsg(msg){
   switch(msg.type){
     case 'READY':          opRdy=true; checkRdy(); break;
+    case 'FLEET_DATA':     recvFleetData(msg.board); break;
     case 'FIRST':          myTurn=msg.first; startGame(); break;
     case 'SHOT':           recvShot(msg.r,msg.c); break;
     case 'RESULT':         recvResult(msg); break;
@@ -961,14 +997,28 @@ function confirmPlacement(){
   SFX.click(); myRdy=true; buildB();
   if(mode==='ai'){ startAIBattle(); }
   else{
+    // Build a flat 10x10 board from our placed ships and send it to opponent.
+    // The opponent stores this in mpEnemyBoard for X3N ghost rendering.
+    const myFlat=Array.from({length:G},()=>Array(G).fill(0));
+    placed.forEach(s=>s.cells.forEach(({r,c})=>myFlat[r][c]=1));
+    snd({type:'FLEET_DATA', board:myFlat});
     snd({type:'READY'});
     document.getElementById('ps').style.display='none';
     document.getElementById('wm').style.display='block';
     checkRdy();
   }
 }
+// Receive and store the opponent fleet board sent before the game starts.
+function recvFleetData(board){
+  mpEnemyBoard=board;
+  mpFleetReceived=true;
+  // If X3N was already activated before the fleet data arrived, apply now.
+  if(x3nActive && gameStarted) applyX3NGhosts();
+  checkRdy();
+}
 function checkRdy(){
-  if(!myRdy||!opRdy) return;
+  // Both players must have sent READY *and* we must have received opponent fleet data.
+  if(!myRdy||!opRdy||!mpFleetReceived) return;
   document.getElementById('wm').style.display='none';
   const iDecide=myId<conn.peer;
   if(iDecide){const iFirst=Math.random()<.5;snd({type:'FIRST',first:!iFirst});myTurn=iFirst;startGame();}
@@ -1012,14 +1062,14 @@ function startGame(){
   document.getElementById('wm').style.display='none';
   stats={h:0,m:0,k:0};
   if(mode==='human') document.getElementById('chat-wrap').style.display='block';
-  renderMG(); renderEG();
+  renderMG();
+  renderEG();
+  // X3N: apply ghosts NOW — enemy grid cells exist in DOM
+  if(x3nActive) applyX3NGhosts();
   updateBoardVis();
   updateTI();
   sts('g',myTurn?'YOUR TURN — OPEN FIRE':'ENEMY TURN — STANDBY');
   log('⚡ BATTLE COMMENCED — ALL HANDS TO STATIONS','info');
-  // Apply X3N ghosts immediately if already active
-  if(x3nActive) applyX3NGhosts();
-  // If AI goes first
   if(mode==='ai'&&!myTurn) scheduleAI();
 }
 
@@ -1044,7 +1094,11 @@ function updateBoardVis(){
 function mkLbls(){
   const row=document.createElement('div'); row.className='glr';
   COLS.split('').forEach(ch=>{
-    const l=document.createElement('div'); l.className='gl'; l.textContent=ch; row.appendChild(l);
+    const l=document.createElement('div');
+    l.className='gl';
+    l.textContent=ch;
+    // No explicit width needed — CSS .gl already sets width:var(--cell-sz) via the rule above
+    row.appendChild(l);
   });
   return row;
 }
@@ -1213,7 +1267,7 @@ function aiTurn(){
   myTurn=true;
   updateTI(); updateBoardVis();
   sts('g','YOUR TURN — OPEN FIRE');
-  // Re-apply X3N ghosts in case any were cleared
+  // Re-apply X3N ghosts every time enemy grid becomes visible
   if(x3nActive) applyX3NGhosts();
 }
 
@@ -1281,6 +1335,8 @@ function recvShot(r,c){
   myTurn=true;
   updateTI(); updateBoardVis();
   sts('g','RETURN FIRE — YOUR TURN');
+  // Enemy grid is now visible — re-apply X3N ghosts for multiplayer
+  if(x3nActive) applyX3NGhosts();
 }
 
 function recvResult(msg){
@@ -1393,6 +1449,8 @@ function doRematch(){
   document.getElementById('rematch-status').textContent='';
   document.getElementById('rematch-btn').style.display='none';
   myRdy=false; opRdy=false; over=false; gameStarted=false;
+  // Reset multiplayer fleet tracking so FLEET_DATA is re-exchanged this round
+  mpEnemyBoard=null; mpFleetReceived=false;
   stats={h:0,m:0,k:0}; updSt();
   document.getElementById('blog').innerHTML='';
   document.getElementById('clog').innerHTML='';
