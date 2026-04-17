@@ -8,9 +8,6 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-/* ═══════════════════════════════════════════════
-   DESIGN TOKENS — Cartoony, bright, fun palette
-═══════════════════════════════════════════════ */
 :root {
   --sky:    #1a2744;
   --sky2:   #243258;
@@ -50,7 +47,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Moving ocean dots background */
 body::before {
   content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
   background-image: radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
@@ -61,9 +57,6 @@ body::before {
 
 #app { position:relative; z-index:2; max-width:1120px; margin:0 auto; padding:12px 16px 70px; }
 
-/* ═══════════════════════════════════════════════
-   HEADER
-═══════════════════════════════════════════════ */
 header {
   text-align:center; padding:20px 0 14px;
   position:relative; margin-bottom:16px;
@@ -93,9 +86,6 @@ header {
 .hbtn.help:hover { background:rgba(241,196,15,.28); }
 #x3n-trigger { position:absolute; top:18px; left:0; width:30px; height:30px; background:transparent; border:none; cursor:default; opacity:0; }
 
-/* ═══════════════════════════════════════════════
-   CARDS / PANELS
-═══════════════════════════════════════════════ */
 .card {
   background:var(--card); border:1px solid var(--border);
   border-radius:var(--radius); padding:18px;
@@ -107,9 +97,6 @@ header {
   display:flex; align-items:center; gap:8px;
 }
 
-/* ═══════════════════════════════════════════════
-   STATUS BAR
-═══════════════════════════════════════════════ */
 #statusbar {
   display:none; background:rgba(0,0,0,.35);
   border:1px solid var(--border); border-radius:var(--radius-sm);
@@ -122,7 +109,6 @@ header {
 .sdot.y { background:var(--yellow); box-shadow:0 0 8px var(--yellow); animation:pulse 1s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
 
-/* X3N bar */
 #x3n-bar {
   display:none; padding:7px 14px; text-align:center; font-size:.6rem;
   letter-spacing:.12em; margin-bottom:10px; border-radius:var(--radius-sm);
@@ -132,9 +118,6 @@ header {
 }
 @keyframes x3nPulse { 0%,100%{box-shadow:0 0 0 rgba(231,76,60,0)} 50%{box-shadow:0 0 20px rgba(231,76,60,.3)} }
 
-/* ═══════════════════════════════════════════════
-   LOBBY
-═══════════════════════════════════════════════ */
 #lobby { max-width:520px; margin:20px auto; }
 .mode-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
 .mbtn {
@@ -169,9 +152,6 @@ header {
 }
 .dbtn:hover,.dbtn.sel { border-color:var(--yellow); background:rgba(241,196,15,.12); color:var(--yellow); }
 
-/* ═══════════════════════════════════════════════
-   INPUTS / BUTTONS
-═══════════════════════════════════════════════ */
 input[type=text],input[type=password] {
   width:100%; background:rgba(0,0,0,.35); border:2px solid var(--border);
   color:var(--white); font-family:'IBM Plex Mono',monospace;
@@ -200,9 +180,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 .mt8 { margin-top:8px; }
 .hint { font-size:.56rem; opacity:.45; letter-spacing:.04em; line-height:1.9; margin-top:5px; }
 
-/* ═══════════════════════════════════════════════
-   PLACEMENT
-═══════════════════════════════════════════════ */
 #ps { display:none; }
 .playout { display:grid; grid-template-columns:auto 1fr; gap:18px; align-items:start; }
 @media(max-width:560px){ .playout{grid-template-columns:1fr;} .slist{order:2;} .pright{order:1;} }
@@ -221,9 +198,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 .sdot3 { width:6px; height:6px; border:2px solid var(--fog); border-radius:2px; }
 .pctrl { display:flex; gap:7px; margin-top:11px; flex-wrap:wrap; }
 
-/* ═══════════════════════════════════════════════
-   GRIDS
-═══════════════════════════════════════════════ */
 :root { --rl-w:22px; --rl-gap:4px; }
 .gw { display:inline-block; }
 .glr { display:flex; padding-left:calc(var(--rl-w) + var(--rl-gap)); margin-bottom:3px; }
@@ -243,14 +217,12 @@ input::placeholder { color:rgba(170,180,194,.35); }
   background:linear-gradient(135deg, rgba(22,160,133,.35) 0%, rgba(26,188,156,.25) 100%);
   border-color:rgba(26,188,156,.5);
 }
-/* Mine on own board */
 .cell.mine-placed {
   background:rgba(231,76,60,.2) !important;
   border-color:rgba(231,76,60,.6) !important;
 }
 .cell.mine-placed::after { content:'💣'; font-size:.7em; }
 
-/* X3N ghost */
 .cell.ghost {
   background: rgba(255,182,193,.2) !important;
   border:2px solid rgba(255,130,160,.7) !important;
@@ -262,7 +234,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
   box-shadow:0 0 7px rgba(255,130,160,.8);
 }
 
-/* Sonar highlight */
 .cell.sonar-scan {
   animation:sonarFlash .6s ease-out 3;
 }
@@ -291,7 +262,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 .cell.sunk::after { content:'✕'; color:#fff !important; font-size:.8em; font-weight:700; }
 .cell.prev    { background:rgba(26,188,156,.22); border-color:rgba(26,188,156,.6); }
 .cell.previnv { background:rgba(231,76,60,.22); border-color:rgba(231,76,60,.55); }
-/* Mine-placement mode highlight */
 .cell.mine-target { background:rgba(231,76,60,.15); border-color:rgba(231,76,60,.5); cursor:crosshair; }
 
 #eg .cell:not(.hit):not(.miss) { cursor:crosshair; }
@@ -301,9 +271,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 }
 #eg .cell.ghost:hover { border-color:rgba(255,160,190,.95) !important; }
 
-/* ═══════════════════════════════════════════════
-   WAITING
-═══════════════════════════════════════════════ */
 #wm { display:none; text-align:center; padding:26px; opacity:.6; }
 .spin {
   display:inline-block; width:28px; height:28px;
@@ -312,12 +279,8 @@ input::placeholder { color:rgba(170,180,194,.35); }
 }
 @keyframes spin { to{ transform:rotate(360deg) } }
 
-/* ═══════════════════════════════════════════════
-   GAME SCREEN
-═══════════════════════════════════════════════ */
 #gs { display:none; }
 
-/* Turn indicator */
 #ti {
   font-family:'Nunito',sans-serif; font-size:.9rem; font-weight:800;
   padding:10px 16px; text-align:center; margin-bottom:12px;
@@ -336,15 +299,11 @@ input::placeholder { color:rgba(170,180,194,.35); }
 }
 @keyframes atkPulse { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 20px rgba(231,76,60,.3)} }
 
-/* Board visibility */
 .board-wrap.hidden { display:none; }
-
-/* Board focus scaling */
 .board-wrap { transition:transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s ease; }
 .board-wrap.active-board { transform:scale(1); opacity:1; }
 .board-wrap.inactive-board { transform:scale(.96); opacity:.65; }
 
-/* Stats row */
 .srow { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
 .sbox {
   flex:1; min-width:58px; background:rgba(0,0,0,.3);
@@ -357,7 +316,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 .sm .sv { color:var(--fog); }
 .sk .sv { color:var(--yellow); text-shadow:0 0 8px rgba(241,196,15,.4); }
 
-/* Game layout */
 .glayout { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 @media(max-width:640px){ .glayout{ grid-template-columns:1fr; } }
 
@@ -369,9 +327,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 .mybt .bind { background:var(--teal); box-shadow:0 0 6px var(--teal); }
 .enbt .bind { background:var(--red); box-shadow:0 0 6px var(--red); }
 
-/* ═══════════════════════════════════════════════
-   CHARGE METER
-═══════════════════════════════════════════════ */
 #charge-bar {
   display:none; margin-bottom:12px;
   background:rgba(0,0,0,.3); border:2px solid var(--border);
@@ -397,9 +352,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 }
 @keyframes pipPop { 0%{transform:scale(.7)} 60%{transform:scale(1.25)} 100%{transform:scale(1)} }
 
-/* ═══════════════════════════════════════════════
-   ABILITY BAR
-═══════════════════════════════════════════════ */
 #ability-bar {
   display:none; margin-bottom:12px;
   background:rgba(0,0,0,.3); border:2px solid var(--border);
@@ -440,16 +392,13 @@ input::placeholder { color:rgba(170,180,194,.35); }
   font-size:.5rem; color:var(--red); font-weight:700;
 }
 
-/* Colour coding per ability */
 .abil-mine   { border-color:rgba(231,76,60,.3);  }
 .abil-sonar  { border-color:rgba(26,188,156,.3);  }
 .abil-prec   { border-color:rgba(155,89,182,.3);  }
 .abil-depth  { border-color:rgba(230,126,34,.3);  }
 .abil-air    { border-color:rgba(52,152,219,.3);  }
 
-/* ═══════════════════════════════════════════════
-   FINISH TURN BUTTON
-═══════════════════════════════════════════════ */
+/* ── FINISH TURN BUTTON ── */
 #finish-turn-wrap {
   display:none; text-align:center; margin-bottom:12px;
 }
@@ -465,7 +414,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 #finish-turn-btn:active { transform:translateY(2px); box-shadow:0 2px 0 var(--teal2), 0 4px 12px rgba(26,188,156,.3); }
 #finish-turn-btn:disabled { opacity:.3; cursor:not-allowed; transform:none; box-shadow:none; }
 
-/* Ability feedback message */
 #ability-msg {
   display:none; text-align:center; padding:9px 14px; margin-bottom:10px;
   border-radius:var(--radius-sm); font-family:'Nunito',sans-serif;
@@ -476,9 +424,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 #ability-msg.result { background:rgba(241,196,15,.12); border:2px solid rgba(241,196,15,.4); color:var(--yellow); }
 @keyframes msgPop { from{transform:scale(.9);opacity:0} to{transform:scale(1);opacity:1} }
 
-/* ═══════════════════════════════════════════════
-   HIT ALERT
-═══════════════════════════════════════════════ */
 #hit-alert { display:none; position:fixed; top:0; left:0; right:0; z-index:200; pointer-events:none; }
 .ha-inner {
   background:linear-gradient(90deg, rgba(231,76,60,.95), rgba(192,57,43,.98), rgba(231,76,60,.95));
@@ -489,9 +434,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 .ha-title { font-family:'Nunito',sans-serif; font-size:1.05rem; font-weight:900; color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.5); }
 .ha-detail { font-size:.65rem; color:rgba(255,210,200,.85); margin-top:2px; }
 
-/* ═══════════════════════════════════════════════
-   CHAT
-═══════════════════════════════════════════════ */
 #chat-wrap { margin-top:12px; display:none; }
 #chat-header {
   display:flex; align-items:center; justify-content:space-between;
@@ -527,9 +469,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 .crow { display:flex; gap:7px; }
 .crow input { font-size:.7rem; padding:7px 10px; }
 
-/* ═══════════════════════════════════════════════
-   BATTLE LOG
-═══════════════════════════════════════════════ */
 #blog {
   margin-top:12px; background:rgba(0,0,0,.3);
   border:2px solid var(--border); border-radius:var(--radius-sm);
@@ -542,9 +481,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 .le.info  { color:var(--white); }
 .le.abil  { color:var(--purple); opacity:1; font-style:italic; }
 
-/* ═══════════════════════════════════════════════
-   FX
-═══════════════════════════════════════════════ */
 @keyframes boom    { 0%{transform:scale(.1) rotate(-10deg);opacity:1} 50%{transform:scale(1.9) rotate(5deg);opacity:.9} 100%{transform:scale(2.5) rotate(0);opacity:0} }
 @keyframes ripple  { 0%{transform:scale(0);opacity:.85;border-radius:50%} 100%{transform:scale(3.5);opacity:0;border-radius:50%} }
 @keyframes mineBoom{ 0%{transform:scale(.1);opacity:1} 30%{transform:scale(2.2);opacity:1} 100%{transform:scale(3.5);opacity:0} }
@@ -552,9 +488,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 .mfx  { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;animation:mineBoom .6s forwards;z-index:10;font-size:1.4em; }
 .rfx  { position:absolute;inset:0;border:2px solid var(--teal);pointer-events:none;animation:ripple .55s forwards;z-index:10; }
 
-/* ═══════════════════════════════════════════════
-   MODALS
-═══════════════════════════════════════════════ */
 .modal-overlay {
   display:none; position:fixed; inset:0;
   background:rgba(0,0,0,.88); z-index:300;
@@ -579,7 +512,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 #rematch-status { font-size:.62rem; color:var(--fog); margin-top:10px; letter-spacing:.04em; min-height:1.4em; }
 #rematch-status.active { color:var(--teal); }
 
-/* HELP MODAL */
 #help-modal { max-width:600px; }
 .help-section { margin-bottom:18px; }
 .help-section h3 { font-family:'Nunito',sans-serif; font-size:.95rem; font-weight:900; color:var(--yellow); margin-bottom:8px; }
@@ -592,7 +524,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 .help-rule strong { color:var(--white); }
 .help-close { width:100%; margin-top:8px; }
 
-/* X3N MODAL */
 .x3n-box {
   background:var(--card2); border:2px solid rgba(231,76,60,.45);
   border-radius:var(--radius); padding:30px 26px; max-width:350px; width:90%;
@@ -611,12 +542,8 @@ input::placeholder { color:rgba(170,180,194,.35); }
 #x3n-err { font-size:.58rem; color:var(--red); opacity:0; margin-bottom:10px; transition:opacity .2s; height:1.2em; }
 #x3n-err.show { opacity:1; }
 
-/* Rematch */
 #rematch-btn { display:none; }
 
-/* ═══════════════════════════════════════════════
-   SCROLLBARS
-═══════════════════════════════════════════════ */
 ::-webkit-scrollbar { width:4px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:rgba(255,255,255,.18); border-radius:2px; }
@@ -628,7 +555,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
 <body>
 <div id="app">
 
-  <!-- HEADER -->
   <header>
     <button id="x3n-trigger" onclick="openX3N()" title=""></button>
     <div class="title">⚓ Naval Strike</div>
@@ -645,7 +571,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
   </div>
   <div id="x3n-bar">⬡ X3N OVERRIDE ACTIVE — ENEMY POSITIONS VISIBLE</div>
 
-  <!-- LOBBY -->
   <div id="lobby" class="card">
     <div class="card-title">⚓ Select Mode</div>
     <div class="mode-grid">
@@ -679,7 +604,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
     </div>
   </div>
 
-  <!-- PLACEMENT -->
   <div id="ps" class="card">
     <div class="card-title">🚢 Deploy Your Fleet</div>
     <div class="playout">
@@ -703,18 +627,15 @@ input::placeholder { color:rgba(170,180,194,.35); }
     </div>
   </div>
 
-  <!-- WAITING -->
   <div id="wm" class="card" style="text-align:center;">
     <div class="spin"></div>
     <div style="font-size:.75rem;">Waiting for opponent to deploy…</div>
     <div class="hint" style="margin-top:4px;">Both players must be ready to begin.</div>
   </div>
 
-  <!-- GAME SCREEN -->
   <div id="gs">
     <div id="ti">—</div>
 
-    <!-- CHARGE METER -->
     <div id="charge-bar">
       <div class="charge-label">
         <span>⚡ BATTLE CHARGE</span>
@@ -723,21 +644,17 @@ input::placeholder { color:rgba(170,180,194,.35); }
       <div class="charge-pips" id="charge-pips"></div>
     </div>
 
-    <!-- ABILITY BAR -->
     <div id="ability-bar">
       <div class="ability-bar-label">SPECIAL ABILITIES — Gain charge when ships are hit</div>
       <div class="abilities" id="abilities"></div>
     </div>
 
-    <!-- ABILITY FEEDBACK -->
     <div id="ability-msg"></div>
 
-    <!-- FINISH TURN -->
     <div id="finish-turn-wrap">
       <button id="finish-turn-btn" onclick="finishTurn()" disabled>✓ End Turn</button>
     </div>
 
-    <!-- STATS -->
     <div class="srow">
       <div class="sbox sh"><span class="sv" id="s-h">0</span><span class="sl">HITS</span></div>
       <div class="sbox sm"><span class="sv" id="s-m">0</span><span class="sl">MISSES</span></div>
@@ -745,7 +662,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
       <div class="sbox"><span class="sv" id="s-a" style="color:var(--yellow);">—</span><span class="sl">ACCURACY</span></div>
     </div>
 
-    <!-- BOARDS -->
     <div class="glayout">
       <div class="board-wrap active-board" id="my-wrap">
         <div class="btitle mybt"><div class="bind"></div> MY FLEET</div>
@@ -758,7 +674,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
       </div>
     </div>
 
-    <!-- CHAT (multiplayer) -->
     <div id="chat-wrap">
       <div id="chat-header" onclick="toggleChat()">
         <div class="chat-hdr-left">
@@ -779,7 +694,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
     <div id="blog"></div>
   </div>
 
-  <!-- HIT ALERT -->
   <div id="hit-alert">
     <div class="ha-inner">
       <div class="ha-title" id="ha-title">⚠ YOUR SHIP HAS BEEN HIT!</div>
@@ -787,7 +701,6 @@ input::placeholder { color:rgba(170,180,194,.35); }
     </div>
   </div>
 
-  <!-- WIN/LOSE MODAL -->
   <div class="modal-overlay" id="mo">
     <div class="modal" id="mdl">
       <h2 id="mt2">—</h2>
@@ -801,25 +714,21 @@ input::placeholder { color:rgba(170,180,194,.35); }
     </div>
   </div>
 
-  <!-- HELP MODAL -->
   <div class="modal-overlay" id="help-modal-overlay">
     <div class="modal" id="help-modal">
       <h2 style="color:var(--yellow);margin-bottom:14px;">📖 How to Play</h2>
-
       <div class="help-section">
         <h3>🎯 Basic Rules</h3>
         <div class="help-rule">Take turns firing at the <strong>enemy grid</strong>. Sink all 5 enemy ships to win.</div>
         <div class="help-rule">Ships: Carrier (5), Battleship (4), Cruiser (3), Submarine (3), Destroyer (2).</div>
         <div class="help-rule">Hit = 🔴, Miss = ·, Sunk = entire ship turns red.</div>
       </div>
-
       <div class="help-section">
         <h3>⚡ Charge System</h3>
         <div class="help-rule">You gain <strong>+1 charge</strong> each time one of your ships is hit (max 6).</div>
         <div class="help-rule">Spend charge to use <strong>special abilities</strong> instead of a normal shot.</div>
         <div class="help-rule">After any action, press <strong>"End Turn"</strong> to confirm and pass to the opponent.</div>
       </div>
-
       <div class="help-section">
         <h3>💥 Special Abilities</h3>
         <div class="help-row">
@@ -854,16 +763,14 @@ input::placeholder { color:rgba(170,180,194,.35); }
           <div class="help-icon">✈️</div>
           <div class="help-text">
             <span class="name">Airstrike</span><span class="cost">5 ⚡</span>
-            <div class="desc">Hits 3 tiles in a straight line. Click to pick orientation (horizontal or vertical). Starts at target and extends in chosen direction.</div>
+            <div class="desc">Hits 3 tiles in a straight line. Click to pick orientation (H/V keys). Starts at target and extends in chosen direction.</div>
           </div>
         </div>
       </div>
-
       <button class="btn btn-p help-close" onclick="closeHelp()">✓ Got it!</button>
     </div>
   </div>
 
-  <!-- X3N MODAL -->
   <div class="modal-overlay" id="x3n-modal">
     <div class="x3n-box">
       <div class="x3n-title">⬡ X3N OVERRIDE</div>
@@ -877,7 +784,7 @@ input::placeholder { color:rgba(170,180,194,.35); }
     </div>
   </div>
 
-</div><!-- #app -->
+</div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -975,13 +882,12 @@ function applyX3NGhosts(){
 function clearGhostAt(r,c){const el=document.getElementById(`en-${r}-${c}`);if(el)el.classList.remove('ghost');}
 
 // ═══════════════════════════════════════════════════════════════
-//  GAME STATE — encapsulated to reduce inspect visibility
+//  GAME STATE
 // ═══════════════════════════════════════════════════════════════
 let mode='ai', diff='easy';
 let peer=null, conn=null, myId=null;
 let placed=[], selShip=null, horiz=true, pg=[];
 
-// Board state — kept in closures where practical
 let _myB=[], _myBH=[], _enB=[], _myShips=[], _myShipC=[];
 let enRem=SHIPS.length, myRem=SHIPS.length;
 let myTurn=false, over=false, myRdy=false, opRdy=false;
@@ -989,10 +895,7 @@ let stats={h:0,m:0,k:0};
 let aiTgts=[], aiHits=[], aiHist=new Set();
 let gameStarted=false;
 
-// Multiplayer fleet exchange
 let mpEnemyBoard=null, mpFleetReceived=false;
-
-// Rematch / chat
 let rematchVotes=0, myVotedRematch=false;
 let chatOpen=false, unreadMsgs=0;
 
@@ -1001,12 +904,12 @@ let chatOpen=false, unreadMsgs=0;
 // ═══════════════════════════════════════════════════════════════
 let myCharge=0;
 let abilityCooldowns={mine:0, sonar:0, prec:0, depth:0, air:0};
-let minesOnBoard=[];      // [{r,c}] player's placed mines (own board)
-let lastAbilUsed=null;    // for precision strike can't-repeat rule
-let selectedAbil=null;    // currently selected ability button
-let airOrientation='h';   // current airstrike orientation
-let actionTaken=false;    // did player take an action this turn?
-let pendingAbil=null;     // which ability is waiting for grid click
+let minesOnBoard=[];
+let lastAbilUsed=null;
+let selectedAbil=null;
+let airOrientation='h';
+let actionTaken=false;   // has the player taken an action this turn?
+let pendingAbil=null;    // which ability is waiting for a grid click
 
 const ABILS=[
   {id:'mine',  name:'Mine',       icon:'💣', cost:2, cls:'abil-mine',  desc:'Place on own board'},
@@ -1046,6 +949,7 @@ function renderAbilBar(){
     const cd=abilityCooldowns[a.id]||0;
     const canAfford=myCharge>=a.cost;
     const onCd=cd>0;
+    // Disabled if: can't afford, on cooldown, not your turn, or already acted this turn
     const disabled=!canAfford||onCd||!myTurn||actionTaken;
     const btn=document.createElement('button');
     btn.className=`abil-btn ${a.cls}`+(selectedAbil===a.id?' selected':'');
@@ -1071,14 +975,12 @@ function selectAbility(id){
   if(id==='prec'&&lastAbilUsed==='prec'){showAbilMsg('⚠ Precision Strike cannot be used twice in a row!','warn');return;}
 
   SFX.abil();
-  // Toggle off if already selected
   if(selectedAbil===id){selectedAbil=null;pendingAbil=null;clearAbilHighlights();renderAbilBar();return;}
   selectedAbil=id;
   pendingAbil=id;
   clearAbilHighlights();
 
   if(id==='mine'){
-    // Highlight own board unhit tiles
     showAbilMsg('💣 Select a tile on YOUR board to place a mine','info');
     highlightMyBoardForMine();
   } else if(id==='sonar'){
@@ -1086,10 +988,8 @@ function selectAbility(id){
     highlightEnBoardForSonar();
   } else if(id==='air'){
     showAbilMsg('✈️ Click enemy tile — then H/V to choose direction','info');
-    setEnGridAbilMode(true);
   } else {
     showAbilMsg(`${def.icon} Select a tile on ENEMY board`,'info');
-    setEnGridAbilMode(true);
   }
   renderAbilBar();
 }
@@ -1109,14 +1009,11 @@ function highlightMyBoardForMine(){
 }
 function highlightEnBoardForSonar(){
   for(let r=0;r<G;r++) for(let c=0;c<G;c++){
-    if(_enB[r][c]===1){// miss
+    if(_enB[r][c]===1){
       const el=document.getElementById(`en-${r}-${c}`);
       if(el) el.classList.add('sonar-scan');
     }
   }
-}
-function setEnGridAbilMode(on){
-  // The click on enemy cells is handled in fire() which checks pendingAbil
 }
 
 function cancelAbility(){
@@ -1126,14 +1023,13 @@ function cancelAbility(){
   renderAbilBar();
 }
 
-// Called when clicking own board while mine ability selected
+// ── OWN BOARD CLICK (mine placement) ──
 function myBoardClick(r,c){
   if(pendingAbil!=='mine') return;
-  if(_myBH[r][c]) return; // already shot
+  if(_myBH[r][c]) return;
   const el=document.getElementById(`my-${r}-${c}`);
   if(!el||el.classList.contains('mine-placed')) return;
   if(minesOnBoard.length>=2){showAbilMsg('⚠ Max 2 mines already placed!','warn');return;}
-  // Place mine
   minesOnBoard.push({r,c});
   el.classList.remove('mine-target');
   el.classList.add('mine-placed');
@@ -1144,14 +1040,15 @@ function myBoardClick(r,c){
   showAbilMsg(`💣 Mine placed at ${COLS[c]}${r+1}!`,'result');
   clearAbilHighlights();
   selectedAbil=null; pendingAbil=null;
+  // ── FIX: mark action taken, enable Finish Turn ──
   actionTaken=true;
   enableFinishTurn();
   renderAbilBar();
-  if(mode==='human') snd({type:'MINE_PLACED',r,c}); // inform opponent for sync
+  if(mode==='human') snd({type:'MINE_PLACED',r,c});
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  FINISH TURN
+//  FINISH TURN  ← THE ONLY PLACE TURNS SWITCH
 // ═══════════════════════════════════════════════════════════════
 function enableFinishTurn(){
   const btn=document.getElementById('finish-turn-btn');
@@ -1165,34 +1062,39 @@ function disableFinishTurn(){
 function finishTurn(){
   if(!actionTaken||over) return;
   SFX.click();
+
   // Tick down cooldowns
   Object.keys(abilityCooldowns).forEach(k=>{if(abilityCooldowns[k]>0) abilityCooldowns[k]--;});
+
+  // Reset per-turn state
   actionTaken=false;
   selectedAbil=null; pendingAbil=null;
   clearAbilHighlights(); hideAbilMsg();
   disableFinishTurn();
 
+  // ── THE ONLY PLACE myTurn flips to false ──
+  myTurn=false;
+  updateTI(); updateBoardVis();
+  renderAbilBar();
+
   if(mode==='ai'){
-    myTurn=false;
-    updateTI(); updateBoardVis();
     sts('y','AI calculating…');
     scheduleAI();
   } else {
-    // Multiplayer: turn already switched in fire/ability logic, nothing extra needed
-    updateTI(); updateBoardVis();
+    // Multiplayer: signal the opponent that we've ended our turn
+    snd({type:'TURN_END'});
+    sts('r','Opponent\'s turn…');
   }
-  renderAbilBar();
 }
 
 // ═══════════════════════════════════════════════════════════════
 //  ABILITY EXECUTION — SONAR
 // ═══════════════════════════════════════════════════════════════
 function execSonar(r,c){
-  if(_enB[r][c]!==1) return; // must be a miss cell
+  if(_enB[r][c]!==1){showAbilMsg('📡 Select a MISSED tile','warn');return;}
   spendCharge(3);
   abilityCooldowns.sonar=1;
   lastAbilUsed='sonar';
-  // Count ship segments in 3x3
   let count=0;
   const board=mode==='ai'?window._aiB:mpEnemyBoard;
   if(!board){showAbilMsg('Sonar unavailable','warn');return;}
@@ -1200,7 +1102,6 @@ function execSonar(r,c){
     const nr=r+dr, nc=c+dc;
     if(nr>=0&&nr<G&&nc>=0&&nc<G&&board[nr][nc]===1&&_enB[nr][nc]===0) count++;
   }
-  // Flash the 3x3 area
   for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
     const nr=r+dr, nc=c+dc;
     if(nr>=0&&nr<G&&nc>=0&&nc<G){
@@ -1212,8 +1113,10 @@ function execSonar(r,c){
   const msg=count===0?`📡 Sonar clear — no ships in area`:`📡 Sonar detects ${count} ship segment${count!==1?'s':''} nearby!`;
   log(msg,'abil');
   showAbilMsg(msg,'result');
-  actionTaken=true; enableFinishTurn();
   selectedAbil=null; pendingAbil=null;
+  // ── FIX: mark action taken, enable Finish Turn ──
+  actionTaken=true;
+  enableFinishTurn();
   renderAbilBar();
   if(mode==='human') snd({type:'ABILITY_SONAR',r,c,count});
 }
@@ -1228,15 +1131,20 @@ function execPrecision(r,c){
   lastAbilUsed='prec';
   SFX.fire();
   log(`🎯 Precision Strike at ${COLS[c]}${r+1}`,'abil');
-  if(mode==='ai') playerVsAI(r,c,true);
-  else{
+
+  if(mode==='ai'){
+    // Apply the shot result immediately (guaranteed hit)
+    applyPlayerShotOnAI(r,c,/*guaranteed*/true);
+  } else {
+    // Mark cell as pending, send to opponent — result comes back via recvResult
     _enB[r][c]=-1;
     snd({type:'SHOT',r,c,precision:true});
-    myTurn=false; actionTaken=true; enableFinishTurn();
-    updateTI(); updateBoardVis();
-    sts('y','Awaiting result…');
   }
+
   selectedAbil=null; pendingAbil=null;
+  // ── FIX: mark action taken, enable Finish Turn — do NOT flip myTurn ──
+  actionTaken=true;
+  enableFinishTurn();
   renderAbilBar();
 }
 
@@ -1244,23 +1152,27 @@ function execPrecision(r,c){
 //  ABILITY EXECUTION — DEPTH BOMB
 // ═══════════════════════════════════════════════════════════════
 function execDepthBomb(r,c){
-  if(_enB[r][c]!==0&&_enB[r][c]!==1){/* allow hitting miss/water cells in cross */}
   spendCharge(4);
   abilityCooldowns.depth=1;
   lastAbilUsed='depth';
   const targets=[[r,c],[r-1,c],[r+1,c],[r,c-1],[r,c+1]].filter(([a,b])=>a>=0&&a<G&&b>=0&&b<G);
   log(`💥 Depth Bomb at ${COLS[c]}${r+1} — ${targets.length} tiles hit`,'abil');
   SFX.mine();
+
   if(mode==='ai'){
-    targets.forEach(([tr,tc])=>{if(_enB[tr][tc]===0) playerVsAI(tr,tc,false,true);}); // silent=true skips turn end
-    actionTaken=true; enableFinishTurn();
+    // Apply all shots; none of them should flip turns
+    targets.forEach(([tr,tc])=>{if(_enB[tr][tc]===0) applyPlayerShotOnAI(tr,tc);});
   } else {
-    targets.forEach(([tr,tc])=>{if(_enB[tr][tc]===0){_enB[tr][tc]=-1; snd({type:'SHOT',r:tr,c:tc,depth:true});}});
-    myTurn=false; actionTaken=true; enableFinishTurn();
-    updateTI(); updateBoardVis();
-    sts('y','Awaiting result…');
+    // Send each untargeted cell as a shot
+    targets.forEach(([tr,tc])=>{
+      if(_enB[tr][tc]===0){_enB[tr][tc]=-1; snd({type:'SHOT',r:tr,c:tc,depth:true});}
+    });
   }
+
   selectedAbil=null; pendingAbil=null;
+  // ── FIX: mark action taken, enable Finish Turn — do NOT flip myTurn ──
+  actionTaken=true;
+  enableFinishTurn();
   renderAbilBar();
 }
 
@@ -1271,7 +1183,6 @@ function execAirstrike(r,c){
   spendCharge(5);
   abilityCooldowns.air=1;
   lastAbilUsed='air';
-  // Ask direction if not decided
   const h=airOrientation==='h';
   const targets=[];
   for(let i=0;i<3;i++){
@@ -1280,20 +1191,23 @@ function execAirstrike(r,c){
   }
   log(`✈️ Airstrike ${h?'→':'↓'} from ${COLS[c]}${r+1}`,'abil');
   SFX.fire();
+
   if(mode==='ai'){
-    targets.forEach(([tr,tc])=>{if(_enB[tr][tc]===0) playerVsAI(tr,tc,false,true);});
-    actionTaken=true; enableFinishTurn();
+    targets.forEach(([tr,tc])=>{if(_enB[tr][tc]===0) applyPlayerShotOnAI(tr,tc);});
   } else {
-    targets.forEach(([tr,tc])=>{if(_enB[tr][tc]===0){_enB[tr][tc]=-1; snd({type:'SHOT',r:tr,c:tc,air:true});}});
-    myTurn=false; actionTaken=true; enableFinishTurn();
-    updateTI(); updateBoardVis();
-    sts('y','Awaiting result…');
+    targets.forEach(([tr,tc])=>{
+      if(_enB[tr][tc]===0){_enB[tr][tc]=-1; snd({type:'SHOT',r:tr,c:tc,air:true});}
+    });
   }
+
   selectedAbil=null; pendingAbil=null;
+  // ── FIX: mark action taken, enable Finish Turn — do NOT flip myTurn ──
+  actionTaken=true;
+  enableFinishTurn();
   renderAbilBar();
 }
 
-// Keyboard shortcut for airstrike orientation
+// Keyboard shortcut for airstrike orientation + escape
 document.addEventListener('keydown',e=>{
   if(pendingAbil==='air'){
     if(e.key==='h'||e.key==='H'){airOrientation='h';showAbilMsg('✈️ Horizontal — click enemy tile','info');}
@@ -1371,6 +1285,7 @@ function setupConn(c){
   conn.on('error',()=>sts('r','Link error'));
 }
 function snd(msg){if(conn&&conn.open)conn.send(msg);}
+
 function handleMsg(msg){
   switch(msg.type){
     case 'READY':          opRdy=true; checkRdy(); break;
@@ -1378,14 +1293,29 @@ function handleMsg(msg){
     case 'FIRST':          myTurn=msg.first; startGame(); break;
     case 'SHOT':           recvShot(msg.r,msg.c); break;
     case 'RESULT':         recvResult(msg); break;
+    case 'TURN_END':       recvTurnEnd(); break;  // ── NEW: opponent finished their turn
     case 'CHAT':           SFX.chat(); appendChat(msg.text,'them'); break;
     case 'REMATCH_REQUEST':onRematchRequest(); break;
     case 'REMATCH_GO':     doRematch(); break;
-    case 'MINE_PLACED':    break; // no-op client-side (server-verified on shot)
-    case 'ABILITY_SONAR':  break; // cosmetic only
-    case 'CHARGE_UPDATE':  break; // not needed — charge is local
+    case 'MINE_PLACED':    break;
+    case 'ABILITY_SONAR':  break;
   }
 }
+
+// ── NEW: called when opponent sends TURN_END ──
+// This is the multiplayer equivalent of "they pressed Finish Turn"
+function recvTurnEnd(){
+  if(over) return;
+  myTurn=true;
+  actionTaken=false;
+  selectedAbil=null; pendingAbil=null;
+  clearAbilHighlights(); hideAbilMsg();
+  disableFinishTurn();
+  updateTI(); updateBoardVis();
+  sts('g','Your turn — fire!');
+  if(x3nActive) applyX3NGhosts();
+}
+
 function copyId(){navigator.clipboard.writeText(myId).then(()=>{const b=document.getElementById('cbtn');b.textContent='Copied!';setTimeout(()=>b.textContent='COPY',1500);});}
 
 // ═══════════════════════════════════════════════════════════════
@@ -1573,7 +1503,7 @@ function startGame(){
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  BOARD VISIBILITY + FOCUS SCALING
+//  BOARD VISIBILITY
 // ═══════════════════════════════════════════════════════════════
 function updateBoardVis(){
   const mw=document.getElementById('my-wrap');
@@ -1610,7 +1540,6 @@ function renderMG(){
       const cell=document.createElement('div');
       cell.className='cell'+(_myB[r][c]?' ship':'');
       cell.id=`my-${r}-${c}`;
-      // Allow clicking own board for mine placement
       cell.addEventListener('click',()=>myBoardClick(r,c));
       cell.addEventListener('touchend',e=>{e.preventDefault();myBoardClick(r,c);},{passive:false});
       row.appendChild(cell);
@@ -1650,13 +1579,13 @@ function updateTI(){
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  PLAYER FIRES (normal shot + ability routing)
+//  PLAYER FIRES  ← routes to normal shot or ability
 // ═══════════════════════════════════════════════════════════════
 function fire(r,c){
   if(!myTurn||over) return;
-  if(actionTaken) return; // already acted this turn
+  if(actionTaken) return; // already acted this turn — must press End Turn
 
-  // Route to ability if one is selected
+  // Route to ability if one is pending
   if(pendingAbil){
     switch(pendingAbil){
       case 'sonar': execSonar(r,c); return;
@@ -1669,40 +1598,63 @@ function fire(r,c){
 
   if(_enB[r][c]!==0) return; // already shot here
   SFX.fire();
-  if(mode==='ai') playerVsAI(r,c);
-  else{
+
+  if(mode==='ai'){
+    applyPlayerShotOnAI(r,c);
+  } else {
+    // Multiplayer: mark locally as pending, send shot to opponent
     _enB[r][c]=-1;
     snd({type:'SHOT',r,c});
-    actionTaken=true; enableFinishTurn();
-    updateTI();
   }
+
+  // ── FIX: mark action taken, enable Finish Turn — do NOT flip myTurn ──
+  actionTaken=true;
+  enableFinishTurn();
+  renderAbilBar();
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  PLAYER vs AI  (also used by ability shots)
+//  APPLY PLAYER SHOT ON AI BOARD  (pure side-effect, no turn logic)
 // ═══════════════════════════════════════════════════════════════
-function playerVsAI(r,c,guaranteed=false,silent=false){
+// This function ONLY resolves the shot visually and updates state.
+// It never touches myTurn, actionTaken, or the Finish Turn button.
+// Callers are responsible for those.
+function applyPlayerShotOnAI(r,c,guaranteed=false){
   if(_enB[r][c]!==0&&!guaranteed) return;
   const hit=window._aiB[r][c]===1;
   _enB[r][c]=hit?2:1;
   let sk=null,sc=null;
   if(hit){
     const ship=window._aiSh.find(s=>s.cells.some(x=>x.r===r&&x.c===c));
-    if(ship){ship.hits++;if(ship.hits>=ship.size){ship.sunk=true;sk=ship.name;sc=ship.cells;enRem--;}}
+    if(ship){
+      ship.hits++;
+      if(ship.hits>=ship.size){ship.sunk=true;sk=ship.name;sc=ship.cells;enRem--;}
+    }
   }
   clearGhostAt(r,c);
   const cell=document.getElementById(`en-${r}-${c}`);
   if(cell){
     cell.classList.add(hit?'hit':'miss');
-    if(hit){expl(cell);stats.h++;if(sk){SFX.sunk();stats.k++;sc.forEach(({r,c})=>{const s=document.getElementById(`en-${r}-${c}`);if(s){s.classList.remove('ghost');s.classList.add('sunk');}});log(`💀 ${sk} sunk!`,'sunk');}else{SFX.hit();log(`🎯 Hit at ${COLS[c]}${r+1}`,'hit');}}
-    else{rip(cell);SFX.miss();stats.m++;log(`• Miss at ${COLS[c]}${r+1}`,'miss');}
+    if(hit){
+      expl(cell); stats.h++;
+      if(sk){
+        SFX.sunk(); stats.k++;
+        sc.forEach(({r,c})=>{
+          const s=document.getElementById(`en-${r}-${c}`);
+          if(s){s.classList.remove('ghost');s.classList.add('sunk');}
+        });
+        log(`💀 ${sk} sunk!`,'sunk');
+      } else {
+        SFX.hit();
+        log(`🎯 Hit at ${COLS[c]}${r+1}`,'hit');
+      }
+    } else {
+      rip(cell); SFX.miss(); stats.m++;
+      log(`• Miss at ${COLS[c]}${r+1}`,'miss');
+    }
   }
   updSt();
-  if(enRem<=0){SFX.win();over=true;showModal(true,'Victory! 🎉','All enemy ships sunk!');return;}
-  if(!silent){
-    actionTaken=true; enableFinishTurn();
-    renderAbilBar();
-  }
+  if(enRem<=0){SFX.win();over=true;showModal(true,'Victory! 🎉','All enemy ships sunk!');}
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1719,16 +1671,16 @@ function aiTurn(){
   else({r,c}=aiHT(diff==='hard'));
   aiHist.add(`${r},${c}`);
   SFX.inc();
-  // Check for mine trigger
+
+  // Check mine trigger
   const mineIdx=minesOnBoard.findIndex(m=>m.r===r&&m.c===c);
   if(mineIdx!==-1){
-    // Mine triggered!
     minesOnBoard.splice(mineIdx,1);
     const el=document.getElementById(`my-${r}-${c}`);
     if(el){el.classList.remove('mine-placed'); mineExpl(el);}
     log(`💣 MINE TRIGGERED at ${COLS[c]}${r+1} — Attack deflected!`,'abil');
     SFX.mine();
-    // Backfire — random untargeted enemy cell with 50% damage
+    // Backfire
     const unshot=[];
     for(let i=0;i<G;i++) for(let j=0;j<G;j++) if(!aiHist.has(`${i},${j}`)) unshot.push({r:i,c:j});
     if(unshot.length>0){
@@ -1747,19 +1699,22 @@ function aiTurn(){
       }
       if(enRem<=0){SFX.win();over=true;showModal(true,'Victory! 🎉','Mine backfire sank the last ship!');return;}
     }
-    myTurn=true; updateTI(); updateBoardVis();
+    // ── FIX: AI turn ends — give turn back to player, reset action state ──
+    myTurn=true; actionTaken=false; disableFinishTurn();
+    updateTI(); updateBoardVis();
+    renderAbilBar();
     sts('g','Your turn!');
     if(x3nActive) applyX3NGhosts();
     return;
   }
 
+  // Normal AI shot
   const hit=_myB[r][c]===1; _myBH[r][c]=true;
   let sk=null,sc=null;
   if(hit){
     const ship=_myShips.find(s=>s.cells.some(x=>x.r===r&&x.c===c));
     if(ship){ship.hits++;if(ship.hits>=ship.size){ship.sunk=true;sk=ship.name;sc=ship.cells;myRem--;}}
     if(diff!=='easy'){aiHits.push({r,c});if(!sk)addTgts(r,c);else{aiHits=[];aiTgts=[];}}
-    // Player gains charge when their ship is hit
     gainCharge(1);
   }
   const cell=document.getElementById(`my-${r}-${c}`);
@@ -1769,10 +1724,19 @@ function aiTurn(){
     if(hit)expl(cell);else rip(cell);
     if(sc)sc.forEach(({r,c})=>{const s=document.getElementById(`my-${r}-${c}`);if(s)s.classList.add('sunk');});
   }
-  if(hit){const sn=sk||_myShipC.find(x=>x.r===r&&x.c===c)?.name||'SHIP';showHitAlert(sn,!!sk);log(`⚠ AI hit your ${sn} at ${COLS[c]}${r+1}`,sk?'sunk':'hit');}
-  else log(`AI missed at ${COLS[c]}${r+1}`,'miss');
+  if(hit){
+    const sn=sk||_myShipC.find(x=>x.r===r&&x.c===c)?.name||'SHIP';
+    showHitAlert(sn,!!sk);
+    log(`⚠ AI hit your ${sn} at ${COLS[c]}${r+1}`,sk?'sunk':'hit');
+  } else {
+    log(`AI missed at ${COLS[c]}${r+1}`,'miss');
+  }
   if(myRem<=0){SFX.lose();over=true;showModal(false,'Defeated 💀','All your ships were sunk.');return;}
-  myTurn=true; updateTI(); updateBoardVis();
+
+  // ── FIX: AI turn ends — give turn back to player, reset action state ──
+  myTurn=true; actionTaken=false; disableFinishTurn();
+  updateTI(); updateBoardVis();
+  renderAbilBar();
   sts('g','Your turn!');
   if(x3nActive) applyX3NGhosts();
 }
@@ -1807,7 +1771,7 @@ function aiHT(smart){
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  MULTIPLAYER SHOTS
+//  MULTIPLAYER — RECEIVE SHOT (opponent shot us)
 // ═══════════════════════════════════════════════════════════════
 function recvShot(r,c){
   // Check mine
@@ -1816,11 +1780,13 @@ function recvShot(r,c){
     minesOnBoard.splice(mineIdx,1);
     const el=document.getElementById(`my-${r}-${c}`);
     if(el){el.classList.remove('mine-placed');mineExpl(el);}
+    // Tell opponent the shot was deflected (mineTrigger=true)
     snd({type:'RESULT',r,c,hit:false,sunk:null,sunkCells:null,gameOver:false,mineTrigger:true});
     log(`💣 Mine blocked enemy shot at ${COLS[c]}${r+1}!`,'abil');
     SFX.mine();
-    myTurn=true; updateTI(); updateBoardVis(); sts('g','Your turn!');
-    if(x3nActive) applyX3NGhosts();
+    // ── FIX: mine deflects shot but does NOT give player their turn back here.
+    // The opponent still needs to press "End Turn" — they get the TURN_END flow normally.
+    // We just acknowledge the result; recvTurnEnd() will handle giving us the turn.
     return;
   }
 
@@ -1829,7 +1795,7 @@ function recvShot(r,c){
   if(hit){
     const ship=_myShips.find(s=>s.cells.some(x=>x.r===r&&x.c===c));
     if(ship){ship.hits++;if(ship.hits>=ship.size){ship.sunk=true;sk=ship.name;sc=ship.cells;myRem--;}}
-    gainCharge(1); // player gains charge when hit
+    gainCharge(1);
   }
   snd({type:'RESULT',r,c,hit,sunk:sk,sunkCells:sc,gameOver:myRem<=0});
   const cell=document.getElementById(`my-${r}-${c}`);
@@ -1839,27 +1805,58 @@ function recvShot(r,c){
     if(hit)expl(cell);else rip(cell);
     if(sc)sc.forEach(({r,c})=>{const s=document.getElementById(`my-${r}-${c}`);if(s)s.classList.add('sunk');});
   }
-  if(hit){const sn=sk||_myShipC.find(x=>x.r===r&&x.c===c)?.name||'SHIP';showHitAlert(sn,!!sk);log(`⚠ Enemy hit your ${sn} at ${COLS[c]}${r+1}`,sk?'sunk':'hit');}
-  else log(`Enemy missed at ${COLS[c]}${r+1}`,'miss');
-  if(myRem<=0){SFX.lose();over=true;showModal(false,'Defeated 💀','All your ships were sunk.');return;}
-  myTurn=true; updateTI(); updateBoardVis(); sts('g','Your turn!');
-  if(x3nActive) applyX3NGhosts();
+  if(hit){
+    const sn=sk||_myShipC.find(x=>x.r===r&&x.c===c)?.name||'SHIP';
+    showHitAlert(sn,!!sk);
+    log(`⚠ Enemy hit your ${sn} at ${COLS[c]}${r+1}`,sk?'sunk':'hit');
+  } else {
+    log(`Enemy missed at ${COLS[c]}${r+1}`,'miss');
+  }
+  if(myRem<=0){SFX.lose();over=true;showModal(false,'Defeated 💀','All your ships were sunk.');}
+  // ── NOTE: we do NOT flip myTurn here. Turn comes via TURN_END from opponent. ──
 }
 
+// ═══════════════════════════════════════════════════════════════
+//  MULTIPLAYER — RECEIVE RESULT (our shot was resolved by opponent)
+// ═══════════════════════════════════════════════════════════════
 function recvResult(msg){
-  if(msg.mineTrigger){log('💣 Enemy mine blocked your shot!','abil');SFX.mine();myTurn=false;updateTI();updateBoardVis();sts('r','Opponent\'s turn');return;}
+  if(msg.mineTrigger){
+    // Our shot hit a mine — it was deflected. Show feedback.
+    log('💣 Enemy mine blocked your shot!','abil');
+    SFX.mine();
+    showAbilMsg('💣 Mine deflected your shot!','warn');
+    // ── FIX: shot was blocked but we DID take an action — Finish Turn still works ──
+    // actionTaken is already true from fire(). No change needed.
+    return;
+  }
   const{r,c,hit,sunk,sunkCells,gameOver:won}=msg;
   _enB[r][c]=hit?2:1;
   clearGhostAt(r,c);
   const cell=document.getElementById(`en-${r}-${c}`);
   if(cell){
     cell.classList.add(hit?'hit':'miss');
-    if(hit){expl(cell);stats.h++;if(sunk){SFX.sunk();stats.k++;if(sunkCells)sunkCells.forEach(({r,c})=>{const s=document.getElementById(`en-${r}-${c}`);if(s){s.classList.remove('ghost');s.classList.add('sunk');}});log(`💀 Enemy ${sunk} sunk!`,'sunk');}else{SFX.hit();log(`🎯 Hit at ${COLS[c]}${r+1}`,'hit');}}
-    else{rip(cell);SFX.miss();stats.m++;log(`• Miss at ${COLS[c]}${r+1}`,'miss');}
+    if(hit){
+      expl(cell); stats.h++;
+      if(sunk){
+        SFX.sunk(); stats.k++;
+        if(sunkCells)sunkCells.forEach(({r,c})=>{
+          const s=document.getElementById(`en-${r}-${c}`);
+          if(s){s.classList.remove('ghost');s.classList.add('sunk');}
+        });
+        log(`💀 Enemy ${sunk} sunk!`,'sunk');
+      } else {
+        SFX.hit();
+        log(`🎯 Hit at ${COLS[c]}${r+1}`,'hit');
+      }
+    } else {
+      rip(cell); SFX.miss(); stats.m++;
+      log(`• Miss at ${COLS[c]}${r+1}`,'miss');
+    }
   }
   updSt();
   if(won){SFX.win();over=true;showModal(true,'Victory! 🎉','All enemy ships sunk!');return;}
-  myTurn=false; updateTI(); updateBoardVis(); sts('r','Opponent\'s turn');
+  // ── FIX: do NOT flip myTurn here. We wait for player to press Finish Turn. ──
+  // actionTaken was already set in fire()/execX(). enableFinishTurn() already called.
 }
 
 // ═══════════════════════════════════════════════════════════════
